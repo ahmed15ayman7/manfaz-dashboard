@@ -48,7 +48,6 @@ const protectedRoutes = {
 
 export async function middleware(request: NextRequest) {
   const token = await getToken({ req: request });
-
   // التحقق من وجود توكن صالح
   if (!token) {
     const url = new URL('/auth/login', request.url);

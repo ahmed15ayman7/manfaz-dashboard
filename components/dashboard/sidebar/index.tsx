@@ -83,6 +83,7 @@ export function Sidebar() {
       sx={{
         height: "100%",
         width: 280,
+        zIndex: 1000,
         position: "fixed",
         borderLeft: "1px solid",
         borderColor: "divider",

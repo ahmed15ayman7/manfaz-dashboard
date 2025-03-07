@@ -4,5 +4,6 @@ declare module "next-auth" {
     interface Session {
         user: Employee;
         accessToken: string;
+        refreshToken: string;
     }
 } 

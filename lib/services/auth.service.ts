@@ -2,6 +2,8 @@ import { jwtDecode } from 'jwt-decode';
 import API_ENDPOINTS from '@/lib/apis';
 import { redirect } from 'next/navigation';
 import axiosInstance from '@/lib/axios';
+import Cookies from 'js-cookie';
+
 interface TokenPayload {
   exp: number;
   user: {
@@ -30,14 +32,14 @@ class AuthService {
   public setTokens(accessToken: string, refreshToken: string) {
     this.accessToken = accessToken;
     this.refresh_token = refreshToken;
-    localStorage.setItem('accessToken', accessToken);
-    localStorage.setItem('refreshToken', refreshToken);
+    Cookies.set('accessToken', accessToken);
+    Cookies.set('refreshToken', refreshToken, { expires: 7 });
     this.startRefreshTokenTimer();
   }
 
   // الحصول على التوكن الحالي
   public getAccessToken(): string {
-    return this.accessToken || localStorage.getItem('accessToken') || '';
+    return this.accessToken || Cookies.get('accessToken') || '';
   }
 
   // التحقق من حالة تسجيل الدخول
@@ -77,7 +79,7 @@ class AuthService {
   public async refreshToken(): Promise<string> {
     try {
       const response = await axiosInstance.post(API_ENDPOINTS.auth.refreshToken({}, false), {
-        refreshToken: this.refresh_token || localStorage.getItem('refreshToken')
+        refreshToken: this.refresh_token || Cookies.get('refreshToken')
       });
 
       const { accessToken, refreshToken } = response.data;
@@ -93,8 +95,8 @@ class AuthService {
   public logout() {
     this.accessToken = '';
     this.refresh_token = '';
-    localStorage.removeItem('accessToken');
-    localStorage.removeItem('refreshToken');
+    Cookies.remove('accessToken');
+    Cookies.remove('refreshToken');
     this.stopRefreshTokenTimer();
     redirect('/auth/login');
   }

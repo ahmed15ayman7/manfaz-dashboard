@@ -14,13 +14,14 @@ import {
 } from '@mui/material';
 import { useMutation } from '@tanstack/react-query';
 import axios from '@/lib/axios';
+import axiosInstance from '@/lib/axios';
 import API_ENDPOINTS from '@/lib/apis';
 import authService from '@/lib/services/auth.service';
 import { IconBuildingStore, IconPhone, IconUserShield } from '@tabler/icons-react';
 import PhoneInput from 'react-phone-input-2';
 import 'react-phone-input-2/lib/style.css';
 import { IconUserCircle } from '@tabler/icons-react';
-
+import { signIn } from 'next-auth/react';
 interface LoginCredentials {
   password: string;
   email: string;
@@ -59,14 +60,19 @@ export default function LoginPage() {
   const emailInputRef = useRef<any>(null);
   const loginMutation = useMutation({
     mutationFn: async (data: LoginCredentials) => {
-
-      const response = await axios.post(API_ENDPOINTS.auth.login({}), data);
-      return response.data;
+      const response = await signIn('credentials', {
+        ...data,
+        redirect: false,
+        callbackUrl: '/api/auth/session'
+      });
+      return response;
     },
+
     onSuccess: (data) => {
       // تعيين التوكن وتوجيه المستخدم للصفحة الرئيسية
-      authService.setTokens(data.accessToken, data.refreshToken);
-      router.push('/dashboard');
+      if (data?.ok) {
+        router.push(data?.url || '/dashboard');
+      }
     },
     onError: (error: any) => {
       setError(error.response?.data?.message || 'حدث خطأ أثناء تسجيل الدخول');
