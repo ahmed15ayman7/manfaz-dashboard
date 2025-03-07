@@ -1,64 +1,25 @@
 'use client';
 
-import { useState } from "react";
-import { Sidebar } from "@/components/dashboard/sidebar";
-import { Topbar } from "@/components/dashboard/topbar";
-import { Drawer, Box } from "@mui/material";
+import { Topbar } from '@/components/dashboard/Topbar';
+import { Sidebar } from '@/components/dashboard/Sidebar';
+import { Providers } from '@/components/Providers';
 
 export default function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const [mobileOpen, setMobileOpen] = useState(false);
-
-  const handleDrawerToggle = () => {
-    setMobileOpen(!mobileOpen);
-  };
-
   return (
-    <Box sx={{ display: "flex", minHeight: "100vh" }}>
-      {/* Sidebar للشاشات الكبيرة */}
-      <Box
-        component="nav"
-        sx={{
-          width: { md: 280 },
-          flexShrink: { md: 0 },
-          display: { xs: "none", md: "block" },
-        }}
-      >
+    <Providers>
+      <div className="flex h-screen overflow-hidden">
         <Sidebar />
-      </Box>
-
-      {/* Drawer للشاشات الصغيرة */}
-      <Drawer
-        variant="temporary"
-        anchor="right"
-        open={mobileOpen}
-        onClose={handleDrawerToggle}
-        ModalProps={{
-          keepMounted: true,
-        }}
-        sx={{
-          display: { xs: "block", md: "none" },
-          "& .MuiDrawer-paper": { width: 280 },
-        }}
-      >
-        <Sidebar />
-      </Drawer>
-
-      {/* المحتوى الرئيسي */}
-      <Box
-        component="main"
-        sx={{
-          flexGrow: 1,
-          minHeight: "100vh",
-          overflow: "hidden",
-        }}
-      >
-        <Topbar onDrawerToggle={handleDrawerToggle} />
-        <Box sx={{ p: 3 }}>{children}</Box>
-      </Box>
-    </Box>
+        <div className="flex flex-1 flex-col overflow-hidden">
+          <Topbar />
+          <main className="flex-1 overflow-y-auto bg-background p-4">
+            {children}
+          </main>
+        </div>
+      </div>
+    </Providers>
   );
 } 

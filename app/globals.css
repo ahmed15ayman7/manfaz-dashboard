@@ -4,42 +4,53 @@
 
 :root {
   --foreground: #171717;
-    --primary: #0068FF;
-    --primary-light: #5A9CFF;
-    --primary-dark: #0041B3;
+    --primary: #2563eb;
+    --primary-light: #60a5fa;
+    --primary-dark: #1d4ed8;
   
-    --secondary: #FFC107;
-    --secondary-light: #FFD54F;
-    --secondary-dark: #FFA000;
-    --secondary-muted: #FFF8E1;
+    --secondary: #f59e0b;
+    --secondary-light: #fbbf24;
+    --secondary-dark: #d97706;
+    --secondary-muted: #fef3c7;
   
-    --accent-green: #4CAF50;
-    --accent-red: #F44336;
-    --accent-orange: #FF9800;
+    --accent-green: #22c55e;
+    --accent-red: #ef4444;
+    --accent-orange: #f97316;
   
-    --grey: #B0B0B0;
-    --light-grey: #F5F5F5;
-    --dark-grey: #616161;
+    --grey: #9ca3af;
+    --light-grey: #f3f4f6;
+    --dark-grey: #4b5563;
   
-    --background: #F2F6FF;
-    --background-secondary: #FFF8E1;
-    --surface: #FFFFFF;
+    --background: #f8fafc;
+    --background-secondary: #f1f5f9;
+    --surface: #ffffff;
   
-    --text-primary: #2F4664;
-    --text-secondary: #B0B0B0;
-    --text-hint: rgba(0, 0, 0, 0.38);
+    --text-primary: #1e293b;
+    --text-secondary: #64748b;
+    --text-hint: #94a3b8;
   
-    --button-primary: #0068FF;
-    --button-secondary: #FFC107;
-    --button-text: #FFFFFF;
+    --button-primary: #2563eb;
+    --button-secondary: #f59e0b;
+    --button-text: #ffffff;
   
-    --error: #F44336;
-    --success: #4CAF50;
-    --warning: #FF9800;
-    --info: #5A9CFF;
+    --error: #ef4444;
+    --success: #22c55e;
+    --warning: #f97316;
+    --info: #3b82f6;
   
-    --divider: #E0E0E0;
+    --divider: #e2e8f0;
 
+    /* إضافة متغيرات جديدة للظلال */
+    --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
+    --shadow: 0 1px 3px 0 rgb(0 0 0 / 0.1), 0 1px 2px -1px rgb(0 0 0 / 0.1);
+    --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+    --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+    --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
+
+    /* إضافة متغيرات للتحولات */
+    --transition-all: all 0.3s ease-in-out;
+    --transition-transform: transform 0.2s ease-in-out;
+    --transition-opacity: opacity 0.2s ease-in-out;
 }
 
 /* @media (prefers-color-scheme: dark) {
@@ -83,8 +94,6 @@ body {
     @apply h-auto min-w-[74px] rounded-lg bg-primary text-[12px] text-light-1 !important;
   }
 
-
-
   .topbar {
     @apply fixed top-0 z-30 flex w-full items-center justify-between bg-white px-6 py-3 max-sm:px-0;
   }
@@ -115,6 +124,54 @@ body {
 
   .rightsidebar {
     @apply sticky right-0 top-0 z-20 flex h-screen w-fit flex-col justify-between gap-12 overflow-auto border-l border-l-gray-100 bg-white px-10 pb-6 pt-28 max-xl:hidden;
+  }
+
+  .card {
+    @apply bg-surface rounded-xl shadow-md hover:shadow-lg transition-all duration-300;
+  }
+
+  .button-primary {
+    @apply bg-primary text-white rounded-lg px-4 py-2 hover:bg-primary-dark transition-all duration-300;
+  }
+
+  .button-secondary {
+    @apply bg-secondary text-white rounded-lg px-4 py-2 hover:bg-secondary-dark transition-all duration-300;
+  }
+
+  .input-field {
+    @apply bg-background border border-divider rounded-lg px-4 py-2 focus:ring-2 focus:ring-primary focus:border-transparent transition-all duration-300;
+  }
+
+  .table-container {
+    @apply overflow-x-auto rounded-xl shadow-md;
+  }
+
+  .table-header {
+    @apply bg-background-secondary text-text-primary font-semibold py-3 px-4;
+  }
+
+  .table-cell {
+    @apply py-3 px-4 border-b border-divider;
+  }
+
+  .badge {
+    @apply inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium;
+  }
+
+  .badge-success {
+    @apply bg-success/10 text-success;
+  }
+
+  .badge-error {
+    @apply bg-error/10 text-error;
+  }
+
+  .badge-warning {
+    @apply bg-warning/10 text-warning;
+  }
+
+  .badge-info {
+    @apply bg-info/10 text-info;
   }
 }
 
@@ -176,7 +233,6 @@ body {
   @apply focus-visible:ring-0 focus-visible:ring-transparent focus-visible:ring-offset-0 !important;
 }
 
-
 .account-form_image-input {
   @apply cursor-pointer border-none bg-transparent outline-none file:text-primary !important;
 }
@@ -190,4 +246,31 @@ body {
 [dir="rtl"] .css-1ocwoqn-MuiStack-root>:not(style)~:not(style) {
   margin-left: 0px !important;
   margin-right: 16px !important;
+}
+
+/* تحسينات إضافية للتصميم */
+.glassmorphism {
+  @apply backdrop-blur-md bg-white/30 border border-white/20;
+}
+
+.hover-scale {
+  @apply hover:scale-105 transition-transform duration-300;
+}
+
+.animate-fade-in {
+  @apply animate-[fadeIn_0.3s_ease-in-out];
+}
+
+.animate-slide-up {
+  @apply animate-[slideUp_0.3s_ease-in-out];
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideUp {
+  from { transform: translateY(20px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
 }

@@ -9,30 +9,108 @@ import {
   DialogContent,
   DialogActions,
   Typography,
+  CircularProgress,
 } from '@mui/material';
 import { useDropzone } from 'react-dropzone';
 import Cropper from 'react-cropper';
 import 'cropperjs/dist/cropper.css';
-import { IconUpload, IconPhoto } from '@tabler/icons-react';
+import { IconUpload, IconPhoto, IconX } from '@tabler/icons-react';
 import { CldUploadWidget } from 'next-cloudinary';
 import Image from 'next/image';
 
 interface ImageUploadProps {
   value?: string;
-  onChange: (value: string) => void;
-  aspectRatio?: number;
+  onChange: (url: string) => void;
   maxSize?: number; // بالميجابايت
+  aspectRatio?: number;
+  className?: string;
 }
 
-export function ImageUpload({
+export const ImageUpload = ({
   value,
   onChange,
-  aspectRatio = 16 / 9,
-  maxSize = 5, // 5 ميجابايت افتراضياً
-}: ImageUploadProps) {
+  maxSize = 5, // 5 ميجابايت كحد أقصى افتراضي
+  aspectRatio = 1, // مربع افتراضي
+  className = '',
+}: ImageUploadProps) => {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
   const [file, setFile] = useState<File | null>(null);
   const [cropper, setCropper] = useState<any>();
   const [isCropperOpen, setIsCropperOpen] = useState(false);
+
+  // التحقق من حجم وامتداد الملف
+  const validateFile = (file: File): boolean => {
+    // التحقق من الحجم
+    if (file.size > maxSize * 1024 * 1024) {
+      setError(`حجم الملف يجب أن يكون أقل من ${maxSize} ميجابايت`);
+      return false;
+    }
+
+    // التحقق من نوع الملف
+    const validTypes = ['image/jpeg', 'image/png', 'image/webp'];
+    if (!validTypes.includes(file.type)) {
+      setError('يجب أن يكون الملف بصيغة JPG أو PNG أو WebP');
+      return false;
+    }
+
+    setError(null);
+    return true;
+  };
+
+  // رفع الصورة إلى Cloudinary
+  const uploadToCloudinary = async (file: File) => {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('upload_preset', process.env.NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET!);
+
+    try {
+      const response = await fetch(
+        `https://api.cloudinary.com/v1_1/${process.env.NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME}/image/upload`,
+        {
+          method: 'POST',
+          body: formData,
+        }
+      );
+
+      const data = await response.json();
+      if (data.error) {
+        throw new Error(data.error.message);
+      }
+
+      return data.secure_url;
+    } catch (error) {
+      console.error('خطأ في رفع الصورة:', error);
+      setError('حدث خطأ أثناء رفع الصورة');
+      throw error;
+    }
+  };
+
+  // معالجة اختيار الملف
+  const handleFileSelect = useCallback(async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    if (!validateFile(file)) return;
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      const url = await uploadToCloudinary(file);
+      onChange(url);
+    } catch (error) {
+      console.error('خطأ في رفع الصورة:', error);
+      setError('حدث خطأ أثناء رفع الصورة');
+    } finally {
+      setLoading(false);
+    }
+  }, [onChange]);
+
+  // إزالة الصورة
+  const handleRemove = useCallback(() => {
+    onChange('');
+  }, [onChange]);
 
   const onDrop = useCallback((acceptedFiles: File[]) => {
     const file = acceptedFiles[0];
@@ -86,55 +164,72 @@ export function ImageUpload({
   };
 
   return (
-    <>
+    <Box className={`relative ${className}`}>
+      {/* منطقة رفع الصورة */}
       <Box
-        {...getRootProps()}
-        sx={{
-          border: '2px dashed',
-          borderColor: isDragActive ? 'primary.main' : 'grey.300',
-          borderRadius: 1,
-          p: 3,
-          textAlign: 'center',
-          cursor: 'pointer',
-          bgcolor: isDragActive ? 'primary.lighter' : 'background.paper',
-          transition: 'all 0.2s ease',
-          '&:hover': {
-            borderColor: 'primary.main',
-            bgcolor: 'primary.lighter',
-          },
-        }}
+        className={`
+          relative
+          flex
+          flex-col
+          items-center
+          justify-center
+          w-full
+          h-40
+          border-2
+          border-dashed
+          rounded-lg
+          transition-all
+          ${value ? 'border-primary' : 'border-gray-300'}
+          ${loading ? 'opacity-50' : 'hover:border-primary'}
+        `}
       >
-        <input {...getInputProps()} />
-        {value ? (
-          <Box sx={{ position: 'relative', height: 200 }}>
-            <Image
-              src={value}
-              alt="الصورة المحددة"
-              fill
-              style={{ objectFit: 'contain' }}
-            />
-          </Box>
+        {loading ? (
+          <CircularProgress size={24} />
+        ) : value ? (
+          <>
+            {/* عرض الصورة المختارة */}
+            <Box className="relative w-full h-full">
+              <Image
+                src={value}
+                alt="الصورة المختارة"
+                fill
+                style={{ objectFit: 'cover' }}
+                className="rounded-lg"
+              />
+              {/* زر إزالة الصورة */}
+              <Button
+                onClick={handleRemove}
+                className="absolute top-2 right-2"
+                variant="contained"
+                color="error"
+                size="small"
+              >
+                <IconX size={16} />
+              </Button>
+            </Box>
+          </>
         ) : (
-          <Box
-            sx={{
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              gap: 1,
-            }}
-          >
-            <IconPhoto size={48} strokeWidth={1} />
-            <Typography>
-              {isDragActive
-                ? 'أفلت الصورة هنا'
-                : 'اسحب وأفلت الصورة هنا أو اضغط للاختيار'}
-            </Typography>
-            <Typography variant="caption" color="text.secondary">
-              PNG, JPG, JPEG أو WEBP - بحد أقصى {maxSize} ميجابايت
-            </Typography>
-          </Box>
+          <>
+            {/* زر اختيار الصورة */}
+            <IconUpload size={24} className="mb-2 text-gray-400" />
+            <input
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              onChange={handleFileSelect}
+              className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+            />
+            <span className="text-sm text-gray-500">اختر صورة أو اسحبها هنا</span>
+            <span className="text-xs text-gray-400 mt-1">
+              JPG, PNG, WebP | بحد أقصى {maxSize} ميجابايت
+            </span>
+          </>
         )}
       </Box>
+
+      {/* عرض رسالة الخطأ */}
+      {error && (
+        <p className="mt-2 text-sm text-error">{error}</p>
+      )}
 
       <Dialog
         open={isCropperOpen}
@@ -161,6 +256,6 @@ export function ImageUpload({
           </Button>
         </DialogActions>
       </Dialog>
-    </>
+    </Box>
   );
-} 
+}; 

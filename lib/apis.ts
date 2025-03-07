@@ -1,4 +1,3 @@
-
 const appendQueryParams = (url: string, params: Record<string, any> = {}) => {
     const query = new URLSearchParams(params).toString();
     return query ? `${url}?${query}` : url;
@@ -101,6 +100,36 @@ const appendQueryParams = (url: string, params: Record<string, any> = {}) => {
       update: (id: string, params:Record<string, any>) => appendQueryParams(`/locations/${id}`, params),
       delete: (id: string, params:Record<string, any>) => appendQueryParams(`/locations/${id}`, params),
       setDefault: (id: string, params:Record<string, any>) => appendQueryParams(`/locations/${id}/set-default`, params),
+    },
+    employees: {
+      getAll: (params: Record<string, any>) => appendQueryParams('/employees', params),
+      getById: (id: string, params: Record<string, any>) => appendQueryParams(`/employees/${id}`, params),
+      create: (params: Record<string, any>) => appendQueryParams('/employees', params),
+      update: (id: string, params: Record<string, any>) => appendQueryParams(`/employees/${id}`, params),
+      delete: (id: string, params: Record<string, any>) => appendQueryParams(`/employees/${id}`, params),
+      updatePermissions: (id: string, params: Record<string, any>) => appendQueryParams(`/employees/${id}/permissions`, params),
+      updateRole: (id: string, params: Record<string, any>) => appendQueryParams(`/employees/${id}/role`, params),
+      toggleActive: (id: string, params: Record<string, any>) => appendQueryParams(`/employees/${id}/toggle-active`, params),
+    },
+    employeeActivities: {
+      getAll: (params: Record<string, any>) => appendQueryParams('/employee-activities', params),
+      getByEmployee: (employeeId: string, params: Record<string, any>) => appendQueryParams(`/employees/${employeeId}/activities`, params),
+      getAuditLogs: (params: Record<string, any>) => appendQueryParams('/audit-logs', params),
+    },
+    reports: {
+      getDashboardStats: (params: Record<string, any>) => appendQueryParams('/reports/dashboard', params),
+      getSalesReport: (params: Record<string, any>) => appendQueryParams('/reports/sales', params),
+      getRevenueReport: (params: Record<string, any>) => appendQueryParams('/reports/revenue', params),
+      getEmployeePerformance: (employeeId: string, params: Record<string, any>) => appendQueryParams(`/reports/employees/${employeeId}/performance`, params),
+      getEmployeeActivities: (employeeId: string, params: Record<string, any>) => appendQueryParams(`/reports/employees/${employeeId}/activities`, params),
+      exportToExcel: (reportType: string, params: Record<string, any>) => appendQueryParams(`/reports/export/${reportType}`, params),
+      exportToPDF: (reportType: string, params: Record<string, any>) => appendQueryParams(`/reports/export/${reportType}/pdf`, params),
+    },
+    settings: {
+      get: (params: Record<string, any>) => appendQueryParams('/settings', params),
+      update: (params: Record<string, any>) => appendQueryParams('/settings', params),
+      backup: (params: Record<string, any>) => appendQueryParams('/settings/backup', params),
+      restore: (params: Record<string, any>) => appendQueryParams('/settings/restore', params),
     },
   };
   

@@ -6,7 +6,8 @@ export interface User {
     phone: string;
     password: string;
     imageUrl?: string;
-    role: UserRole;
+    accountType: "user" | "employee";
+    role: UserRole | EmployeeRole;
     verificationCode?: number;
     createdAt?: Date;
     updatedAt?: Date;
@@ -15,6 +16,7 @@ export interface User {
     orders: Order[];
     wallet?: Wallet;
     locations: UserLocation[];
+    employeeData?: Employee;
 }
 
 type UserRole = "user" | "store" | "worker";
@@ -351,4 +353,99 @@ export interface Reward {
     points: number; // النقاط المكتسبة
     description?: string; // وصف المكافأة
     createdAt: Date;
+}
+
+// نوع دور الموظف
+export type EmployeeRole = "customer_service" | "sales" | "supervisor" | "admin";
+
+// واجهة صلاحيات الموظف
+export interface EmployeePermissions {
+  // إدارة الطلبات
+  viewOrders: boolean;
+  updateOrders: boolean;
+  deleteOrders: boolean;
+
+  // إدارة العملاء
+  viewCustomers: boolean;
+  updateCustomers: boolean;
+
+  // إدارة الخدمات
+  viewServices: boolean;
+  createServices: boolean;
+  updateServices: boolean;
+  deleteServices: boolean;
+
+  // إدارة العروض والخصومات
+  viewOffers: boolean;
+  createOffers: boolean;
+  updateOffers: boolean;
+  deleteOffers: boolean;
+
+  // إدارة التصنيفات
+  viewCategories: boolean;
+  createCategories: boolean;
+  updateCategories: boolean;
+  deleteCategories: boolean;
+
+  // إدارة المتاجر
+  viewStores: boolean;
+  createStores: boolean;
+  updateStores: boolean;
+  deleteStores: boolean;
+
+  // إدارة مقدمي الخدمات
+  viewProviders: boolean;
+  approveProviders: boolean;
+  updateProviders: boolean;
+  deleteProviders: boolean;
+
+  // إدارة المحافظ والمدفوعات
+  viewWallets: boolean;
+  manageTransactions: boolean;
+
+  // إدارة التقارير
+  viewBasicReports: boolean;
+  viewAdvancedReports: boolean;
+  exportReports: boolean;
+
+  // إدارة الموظفين
+  viewEmployees: boolean;
+  createEmployees: boolean;
+  updateEmployees: boolean;
+  deleteEmployees: boolean;
+  managePermissions: boolean;
+
+  // إدارة النظام
+  manageSettings: boolean;
+  viewAuditLogs: boolean;
+  manageBackups: boolean;
+}
+
+// واجهة نشاط الموظف
+export interface EmployeeActivity {
+  id: string;
+  employeeId: string;
+  action: string;
+  details: string;
+  oldData?: any;
+  newData?: any;
+  ipAddress?: string;
+  createdAt: Date;
+}
+
+// واجهة الموظف
+export interface Employee {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  password: string;
+  imageUrl?: string;
+  role: EmployeeRole;
+  permissions: EmployeePermissions;
+  isActive: boolean;
+  lastLoginAt?: Date;
+  activities?: EmployeeActivity[];
+  createdAt: Date;
+  updatedAt: Date;
 }
