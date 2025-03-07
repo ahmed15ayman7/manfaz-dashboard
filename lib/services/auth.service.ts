@@ -1,7 +1,7 @@
-import axios from 'axios';
 import { jwtDecode } from 'jwt-decode';
 import API_ENDPOINTS from '@/lib/apis';
-
+import { redirect } from 'next/navigation';
+import axiosInstance from '@/lib/axios';
 interface TokenPayload {
   exp: number;
   user: {
@@ -15,9 +15,9 @@ class AuthService {
   private static instance: AuthService;
   private refreshTokenTimeout?: NodeJS.Timeout;
   private accessToken: string = '';
-  private refreshToken: string = '';
+  private refresh_token: string = '';
 
-  private constructor() {}
+  private constructor() { }
 
   public static getInstance(): AuthService {
     if (!AuthService.instance) {
@@ -29,7 +29,7 @@ class AuthService {
   // تعيين التوكن عند تسجيل الدخول
   public setTokens(accessToken: string, refreshToken: string) {
     this.accessToken = accessToken;
-    this.refreshToken = refreshToken;
+    this.refresh_token = refreshToken;
     localStorage.setItem('accessToken', accessToken);
     localStorage.setItem('refreshToken', refreshToken);
     this.startRefreshTokenTimer();
@@ -76,8 +76,8 @@ class AuthService {
   // تجديد التوكن
   public async refreshToken(): Promise<string> {
     try {
-      const response = await axios.post(API_ENDPOINTS.auth.refresh, {
-        refreshToken: this.refreshToken || localStorage.getItem('refreshToken')
+      const response = await axiosInstance.post(API_ENDPOINTS.auth.refreshToken({}, false), {
+        refreshToken: this.refresh_token || localStorage.getItem('refreshToken')
       });
 
       const { accessToken, refreshToken } = response.data;
@@ -92,11 +92,11 @@ class AuthService {
   // تسجيل الخروج
   public logout() {
     this.accessToken = '';
-    this.refreshToken = '';
+    this.refresh_token = '';
     localStorage.removeItem('accessToken');
     localStorage.removeItem('refreshToken');
     this.stopRefreshTokenTimer();
-    window.location.href = '/auth/login';
+    redirect('/auth/login');
   }
 }
 

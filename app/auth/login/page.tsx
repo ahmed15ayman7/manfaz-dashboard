@@ -1,7 +1,6 @@
 'use client';
 
-import { useState } from 'react';
-import { signIn } from 'next-auth/react';
+import { useEffect, useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import {
   Box,
@@ -10,111 +9,221 @@ import {
   TextField,
   Button,
   Alert,
-  Container,
+  ToggleButtonGroup,
+  ToggleButton,
 } from '@mui/material';
-import { IconLogin } from '@tabler/icons-react';
+import { useMutation } from '@tanstack/react-query';
+import axios from '@/lib/axios';
+import API_ENDPOINTS from '@/lib/apis';
+import authService from '@/lib/services/auth.service';
+import { IconBuildingStore, IconPhone, IconUserShield } from '@tabler/icons-react';
+import PhoneInput from 'react-phone-input-2';
+import 'react-phone-input-2/lib/style.css';
+import { IconUserCircle } from '@tabler/icons-react';
+
+interface LoginCredentials {
+  password: string;
+  email: string;
+  phone: string;
+  role: 'customer_service' | 'sales' | 'supervisor' | 'admin';
+}
+const checkIfPhone = (value: string) => {
+
+  // نزيل كل الرموز ماعدا الأرقام
+  const numbersOnly = value.replace(/[^0-9]/g, '');
+  const wordOnly = value.replace(/[^a-zA-Z]/g, '');
+  // إذا كان المدخل يحتوي على 3 أرقام أو أكثر، نعتبره رقم هاتف
+
+  if (wordOnly.length >= 1) {
+    return false;
+  }
+  if (numbersOnly.length >= 1) {
+    return true;
+  }
+  return false;
+};
 
 export default function LoginPage() {
   const router = useRouter();
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [error, setError] = useState('');
-  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string>('');
+  const [focusPhone, setFocusPhone] = useState(false);
+  const [isPhoneInput, setIsPhoneInput] = useState(false);
+  const [credentials, setCredentials] = useState<LoginCredentials>({
+    password: '',
+    email: '',
+    phone: '',
+    role: 'customer_service',
+  });
+  const [emailOrPhone, setEmailOrPhone] = useState('');
+  const phoneInputRef = useRef<any>(null);
+  const emailInputRef = useRef<any>(null);
+  const loginMutation = useMutation({
+    mutationFn: async (data: LoginCredentials) => {
 
-  const handleSubmit = async (e: React.FormEvent) => {
+      const response = await axios.post(API_ENDPOINTS.auth.login({}), data);
+      return response.data;
+    },
+    onSuccess: (data) => {
+      // تعيين التوكن وتوجيه المستخدم للصفحة الرئيسية
+      authService.setTokens(data.accessToken, data.refreshToken);
+      router.push('/dashboard');
+    },
+    onError: (error: any) => {
+      setError(error.response?.data?.message || 'حدث خطأ أثناء تسجيل الدخول');
+    },
+  });
+
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
-    setLoading(true);
-
-    try {
-      const result = await signIn('credentials', {
-        redirect: false,
-        email,
-        password,
-      });
-
-      if (result?.error) {
-        setError('البريد الإلكتروني أو كلمة المرور غير صحيحة');
-      } else {
-        router.push('/');
-      }
-    } catch (error) {
-      setError('حدث خطأ أثناء تسجيل الدخول');
-    } finally {
-      setLoading(false);
-    }
+    loginMutation.mutate({ ...credentials, email: isPhoneInput ? '' : emailOrPhone, phone: isPhoneInput ? emailOrPhone : '' });
+  };
+  const handleInputChange = (value: string) => {
+    setEmailOrPhone(value);
+    setIsPhoneInput(checkIfPhone(value));
   };
 
+  useEffect(() => {
+    setIsPhoneInput(checkIfPhone(emailOrPhone));
+  }, [emailOrPhone]);
+  useEffect(() => {
+    if (isPhoneInput && phoneInputRef.current) {
+      phoneInputRef.current.focus();
+      setFocusPhone(true);
+    } else if (!isPhoneInput && emailInputRef.current?.focus) {
+      emailInputRef.current.focus();
+    }
+  }, [isPhoneInput]);
   return (
-    <Container maxWidth="sm">
-      <Box
+    <Box
+      sx={{
+        height: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        bgcolor: 'background.default',
+      }}
+    >
+      <Paper
+        elevation={3}
         sx={{
-          minHeight: '100vh',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
+          p: 4,
+          width: '100%',
+          maxWidth: 400,
         }}
       >
-        <Paper
-          elevation={3}
-          sx={{
-            p: 4,
-            width: '100%',
-            maxWidth: 'sm',
-            display: 'flex',
-            flexDirection: 'column',
-            gap: 3,
-          }}
-        >
-          <Box sx={{ textAlign: 'center', mb: 2 }}>
-            <Typography variant="h5" component="h1" fontWeight="bold" gutterBottom>
-              تسجيل الدخول
-            </Typography>
-            <Typography variant="body2" color="text.secondary">
-              قم بتسجيل الدخول للوصول إلى لوحة التحكم
-            </Typography>
-          </Box>
+        <Typography variant="h5" textAlign="center" mb={3} fontWeight="bold">
+          تسجيل الدخول
+        </Typography>
 
-          {error && (
-            <Alert severity="error" sx={{ mb: 2 }}>
-              {error}
-            </Alert>
+        {error && (
+          <Alert severity="error" sx={{ mb: 2 }}>
+            {error}
+          </Alert>
+        )}
+        <Box sx={{ mb: 3 }}>
+          <Typography variant="subtitle2" gutterBottom>
+            نوع الحساب
+          </Typography>
+          <ToggleButtonGroup
+            value={credentials.role}
+            sx={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: 1,
+            }}
+            exclusive
+            onChange={(e, value) => value && setCredentials({ ...credentials, role: value })}
+            fullWidth
+          >
+            {/* "customer_service" | "sales" | "supervisor" | "admin" */}
+            <Box sx={{ display: 'flex', flexDirection: 'row', gap: 1 }}>
+              <ToggleButton value="customer_service">
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <IconPhone size={20} />
+                  <span>خدمة العملاء</span>
+                </Box>
+              </ToggleButton>
+              <ToggleButton value="admin">
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <IconUserShield size={20} />
+                  <span>مدير النظام</span>
+                </Box>
+              </ToggleButton>
+
+            </Box>
+            <Box sx={{ display: 'flex', flexDirection: 'row', gap: 1 }}>
+              <ToggleButton value="sales">
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <IconBuildingStore size={20} />
+                  <span>موظف مبيعات</span>
+                </Box>
+              </ToggleButton>
+              <ToggleButton value="supervisor">
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                  <IconUserCircle size={20} />
+                  <span>موظف مشرف</span>
+                </Box>
+              </ToggleButton>
+
+            </Box>
+          </ToggleButtonGroup>
+        </Box>
+        <form onSubmit={handleSubmit}>
+          {!isPhoneInput ? (
+            <TextField
+
+              inputRef={emailInputRef}
+              fullWidth
+              label="البريد الإلكتروني"
+              type="email"
+              value={emailOrPhone}
+              onChange={e => handleInputChange(e.target.value)}
+              sx={{ mb: 2 }}
+              required
+            />
+          ) : (
+            <Box className="" style={{ direction: "ltr", marginBottom: '24px' }}>
+
+              <PhoneInput
+                country={"sa"}
+                inputProps={{
+                  ref: phoneInputRef
+                }}
+                onFocus={e => setFocusPhone(true)}
+                onBlur={e => setFocusPhone(false)}
+                containerClass={`border-2 rounded-[5px] py-[10px] bg-white ${focusPhone ? ' outline-none border-primary' : 'border-gray-300'}`}
+                dropdownStyle={{ border: "none !important" }}
+                value={emailOrPhone}
+                onChange={(value, data, event, formattedValue) => {
+                  handleInputChange(formattedValue);
+                }}
+              />
+            </Box>
           )}
 
-          <form onSubmit={handleSubmit}>
-            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-              <TextField
-                label="البريد الإلكتروني"
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                fullWidth
-              />
+          <TextField
+            fullWidth
+            label="كلمة المرور"
+            type="password"
+            value={credentials.password}
+            onChange={(e) =>
+              setCredentials({ ...credentials, password: e.target.value })
+            }
+            sx={{ mb: 3 }}
+            required
+          />
 
-              <TextField
-                label="كلمة المرور"
-                type="password"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                required
-                fullWidth
-              />
-
-              <Button
-                type="submit"
-                variant="contained"
-                size="large"
-                disabled={loading}
-                startIcon={<IconLogin />}
-                sx={{ mt: 2 }}
-              >
-                {loading ? 'جاري تسجيل الدخول...' : 'تسجيل الدخول'}
-              </Button>
-            </Box>
-          </form>
-        </Paper>
-      </Box>
-    </Container>
+          <Button
+            fullWidth
+            type="submit"
+            variant="contained"
+            disabled={loginMutation.isPending}
+          >
+            {loginMutation.isPending ? 'جاري التسجيل...' : 'تسجيل الدخول'}
+          </Button>
+        </form>
+      </Paper>
+    </Box>
   );
 } 

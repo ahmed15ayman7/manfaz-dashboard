@@ -1,8 +1,10 @@
 import axios from 'axios';
 import authService from './services/auth.service';
+import { BASE_URL } from './config';
 
 const axiosInstance = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL,
+  baseURL: BASE_URL,
+  withCredentials: true,
   headers: {
     'Content-Type': 'application/json',
   },
@@ -35,7 +37,7 @@ axiosInstance.interceptors.response.use(
       try {
         // محاولة تجديد التوكن
         const newAccessToken = await authService.refreshToken();
-        
+
         // تحديث التوكن في الطلب الأصلي وإعادة المحاولة
         originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
         return axiosInstance(originalRequest);

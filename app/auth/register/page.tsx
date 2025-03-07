@@ -14,13 +14,14 @@ import {
   ToggleButton,
   Grid,
 } from '@mui/material';
-import { IconUserCircle, IconBuildingStore } from '@tabler/icons-react';
+import { IconBuildingStore, IconPhone, IconUserCircle, IconUserShield } from '@tabler/icons-react';
 import axios from 'axios';
 import API_ENDPOINTS from '@/lib/apis';
-
+import PhoneInput from 'react-phone-input-2';
+import 'react-phone-input-2/lib/style.css';
 export default function RegisterPage() {
   const router = useRouter();
-  const [accountType, setAccountType] = useState<'user' | 'employee'>('user');
+  const [accountType, setAccountType] = useState<'customer_service' | 'sales' | 'supervisor' | 'admin'>('customer_service');
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -30,7 +31,7 @@ export default function RegisterPage() {
   });
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
-
+  const [focusPhone, setFocusPhone] = useState(false);
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setError('');
@@ -45,7 +46,7 @@ export default function RegisterPage() {
     try {
       const response = await axios.post(API_ENDPOINTS.auth.register({}), {
         ...formData,
-        accountType,
+        role: accountType,
       });
 
       if (response.data) {
@@ -107,22 +108,46 @@ export default function RegisterPage() {
             </Typography>
             <ToggleButtonGroup
               value={accountType}
+              sx={{
+                display: 'flex',
+                flexDirection: 'column',
+                gap: 1,
+              }}
               exclusive
               onChange={(e, value) => value && setAccountType(value)}
               fullWidth
             >
-              <ToggleButton value="user">
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <IconUserCircle size={20} />
-                  <span>مستخدم عادي</span>
-                </Box>
-              </ToggleButton>
-              <ToggleButton value="employee">
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <IconBuildingStore size={20} />
-                  <span>موظف</span>
-                </Box>
-              </ToggleButton>
+              {/* "customer_service" | "sales" | "supervisor" | "admin" */}
+              <Box sx={{ display: 'flex', flexDirection: 'row', gap: 1 }}>
+                <ToggleButton value="customer_service">
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <IconPhone size={20} />
+                    <span>خدمة العملاء</span>
+                  </Box>
+                </ToggleButton>
+                <ToggleButton value="admin">
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <IconUserShield size={20} />
+                    <span>مدير النظام</span>
+                  </Box>
+                </ToggleButton>
+
+              </Box>
+              <Box sx={{ display: 'flex', flexDirection: 'row', gap: 1 }}>
+                <ToggleButton value="sales">
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <IconBuildingStore size={20} />
+                    <span>موظف مبيعات</span>
+                  </Box>
+                </ToggleButton>
+                <ToggleButton value="supervisor">
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <IconUserCircle size={20} />
+                    <span>موظف مشرف</span>
+                  </Box>
+                </ToggleButton>
+
+              </Box>
             </ToggleButtonGroup>
           </Box>
 
@@ -150,14 +175,21 @@ export default function RegisterPage() {
                 />
               </Grid>
               <Grid item xs={12}>
-                <TextField
-                  name="phone"
-                  label="رقم الهاتف"
-                  value={formData.phone}
-                  onChange={handleChange}
-                  required
-                  fullWidth
-                />
+                <div className="" style={{ direction: "ltr" }}>
+
+                  <PhoneInput
+                    country={"sa"}
+                    onFocus={e => setFocusPhone(true)}
+                    onBlur={e => setFocusPhone(false)}
+                    containerClass={`border-2 rounded-[5px] py-2 bg-white ${focusPhone ? ' outline-none border-primary' : 'border-gray-300'}`}
+                    dropdownStyle={{ border: "none !important" }}
+                    value={formData.phone}
+                    onChange={(value, data, event, formattedValue) => {
+                      setFormData({ ...formData, phone: formattedValue });
+                    }}
+                  />
+                </div>
+
               </Grid>
               <Grid item xs={12} md={6}>
                 <TextField

@@ -71,9 +71,12 @@ body {
 }
 .react-tel-input .form-control{
   border: none !important;
+  width: 100% !important;
+  padding:  10px 10px 10px 48px !important;
+  height: 100% !important;
 }
 .react-tel-input .selected-flag, .flag-dropdown {
-  border-radius: 16px 0 0 16px !important;
+  border-radius: 5px 0 0 5px !important;
 }
 @layer components {
   /* main */

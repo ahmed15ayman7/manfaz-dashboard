@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Tajawal } from "next/font/google";
 import "./globals.css";
 import { Providers } from "@/components/providers";
-import { Toaster } from "react-toastify";
+import { ToastContainer } from "react-toastify";
 import 'react-toastify/dist/ReactToastify.css';
 
 const tajawal = Tajawal({
@@ -25,7 +25,7 @@ export default function RootLayout({
       <body className={tajawal.className}>
         <Providers>
           {children}
-          <Toaster position="top-center" />
+          <ToastContainer position="top-center" />
         </Providers>
       </body>
     </html>
