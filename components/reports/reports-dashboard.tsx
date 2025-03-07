@@ -25,7 +25,7 @@ import {
 import { DatePicker } from '@mui/x-date-pickers';
 import {
   IconFileSpreadsheet,
-  IconFilePdf,
+  IconFile3d,
   IconChartBar,
   IconChartPie,
   IconChartLine,
@@ -200,9 +200,8 @@ export default function ReportsDashboard() {
   // تحضير بيانات تقرير PDF
   const pdfData = {
     title: 'تقرير المبيعات والإيرادات',
-    subtitle: `${startDate ? new Date(startDate).toLocaleDateString('ar-SA') : ''} - ${
-      endDate ? new Date(endDate).toLocaleDateString('ar-SA') : ''
-    }`,
+    subtitle: `${startDate ? new Date(startDate).toLocaleDateString('ar-SA') : ''} - ${endDate ? new Date(endDate).toLocaleDateString('ar-SA') : ''
+      }`,
     data: excelData,
   };
 
@@ -449,7 +448,7 @@ export default function ReportsDashboard() {
               <Button
                 fullWidth
                 variant="outlined"
-                startIcon={<IconFilePdf size={20} />}
+                startIcon={<IconFile3d size={20} />}
                 onClick={() => {
                   // تصدير إلى PDF
                 }}

@@ -71,7 +71,7 @@ export function Topbar({ onDrawerToggle }: TopbarProps) {
           >
             <Avatar
               alt={session?.user?.name || "مستخدم"}
-              src={session?.user?.image || ""}
+              src={session?.user?.imageUrl || "https://res.cloudinary.com/dixa9yvlz/image/upload/v1741264530/Manfaz/default-profile.jpg"}
               sx={{ width: 32, height: 32 }}
             />
           </IconButton>

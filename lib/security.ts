@@ -10,7 +10,7 @@ export class SecurityService {
   // تشفير البيانات
   static encrypt(text: string): string {
     const iv = randomBytes(IV_LENGTH);
-    const cipher = createCipheriv('aes-256-cbc', Buffer.from(ENCRYPTION_KEY), iv);
+    const cipher = createCipheriv('aes-256-cbc', Buffer.from(ENCRYPTION_KEY as string), iv);
     let encrypted = cipher.update(text);
     encrypted = Buffer.concat([encrypted, cipher.final()]);
     return `${iv.toString('hex')}:${encrypted.toString('hex')}`;
@@ -21,7 +21,7 @@ export class SecurityService {
     const [ivHex, encryptedHex] = text.split(':');
     const iv = Buffer.from(ivHex, 'hex');
     const encryptedText = Buffer.from(encryptedHex, 'hex');
-    const decipher = createDecipheriv('aes-256-cbc', Buffer.from(ENCRYPTION_KEY), iv);
+    const decipher = createDecipheriv('aes-256-cbc', Buffer.from(ENCRYPTION_KEY as string), iv);
     let decrypted = decipher.update(encryptedText);
     decrypted = Buffer.concat([decrypted, decipher.final()]);
     return decrypted.toString();

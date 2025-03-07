@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect } from 'react';
+import { Suspense, useEffect } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import {
   Box,
@@ -8,10 +8,11 @@ import {
   Typography,
   Button,
   Container,
+  Skeleton,
 } from '@mui/material';
 import { IconAlertTriangle, IconArrowLeft } from '@tabler/icons-react';
 
-export default function AuthErrorPage() {
+function AuthErrorPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const error = searchParams.get('error');
@@ -74,7 +75,7 @@ export default function AuthErrorPage() {
           }}
         >
           <IconAlertTriangle size={48} color="#f44336" />
-          
+
           <Box sx={{ textAlign: 'center' }}>
             <Typography variant="h5" component="h1" fontWeight="bold" gutterBottom>
               خطأ في المصادقة
@@ -95,4 +96,9 @@ export default function AuthErrorPage() {
       </Box>
     </Container>
   );
-} 
+}
+export default function Page() {
+  return <Suspense fallback={<Skeleton variant="rectangular" height="100vh" />}>
+    <AuthErrorPage />
+  </Suspense>
+}

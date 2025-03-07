@@ -156,11 +156,11 @@ export default function OrdersPage() {
     providerName: order.provider?.user?.name,
     price: order.price,
     status: order.status === 'pending' ? 'قيد الانتظار' :
-           order.status === 'in_progress' ? 'قيد التنفيذ' :
-           order.status === 'completed' ? 'مكتمل' : 'ملغي',
+      order.status === 'in_progress' ? 'قيد التنفيذ' :
+        order.status === 'completed' ? 'مكتمل' : 'ملغي',
     paymentStatus: order.paymentStatus === 'pending' ? 'قيد الانتظار' :
-                  order.paymentStatus === 'paid' ? 'مدفوع' : 'فشل الدفع',
-    createdAt: new Date(order.createdAt).toLocaleDateString('ar-SA'),
+      order.paymentStatus === 'paid' ? 'مدفوع' : 'فشل الدفع',
+    createdAt: order.createdAt ? new Date(order.createdAt).toLocaleDateString('ar-SA') : '',
   })) || [];
 
   const handleOpenDialog = (order?: Order) => {
@@ -266,7 +266,7 @@ export default function OrdersPage() {
 
   const invoiceData = selectedOrder ? {
     invoiceNumber: selectedOrder.id,
-    date: new Date(selectedOrder.createdAt).toLocaleDateString('ar-SA'),
+    date: selectedOrder.createdAt ? new Date(selectedOrder.createdAt).toLocaleDateString('ar-SA') : '',
     customerName: selectedOrder.user?.name,
     items: [{
       description: selectedOrder.service?.name,
@@ -275,8 +275,8 @@ export default function OrdersPage() {
       total: selectedOrder.price,
     }],
     total: selectedOrder.price,
-    tax: selectedOrder.price * 0.15, // 15% ضريبة القيمة المضافة
-    grandTotal: selectedOrder.price * 1.15,
+    tax: selectedOrder.price ? selectedOrder.price * 0.15 : 0, // 15% ضريبة القيمة المضافة
+    grandTotal: selectedOrder.price ? selectedOrder.price * 1.15 : 0,
   } : null;
 
   return (
@@ -427,19 +427,19 @@ export default function OrdersPage() {
                           order.status === 'completed'
                             ? 'مكتمل'
                             : order.status === 'pending'
-                            ? 'معلق'
-                            : order.status === 'in_progress'
-                            ? 'قيد التنفيذ'
-                            : 'ملغي'
+                              ? 'معلق'
+                              : order.status === 'in_progress'
+                                ? 'قيد التنفيذ'
+                                : 'ملغي'
                         }
                         color={
                           order.status === 'completed'
                             ? 'success'
                             : order.status === 'pending'
-                            ? 'warning'
-                            : order.status === 'in_progress'
-                            ? 'info'
-                            : 'error'
+                              ? 'warning'
+                              : order.status === 'in_progress'
+                                ? 'info'
+                                : 'error'
                         }
                         size="small"
                       />
@@ -450,37 +450,37 @@ export default function OrdersPage() {
                           order.paymentStatus === 'paid'
                             ? 'مدفوع'
                             : order.paymentStatus === 'pending'
-                            ? 'معلق'
-                            : 'فشل'
+                              ? 'معلق'
+                              : 'فشل'
                         }
                         color={
                           order.paymentStatus === 'paid'
                             ? 'success'
                             : order.paymentStatus === 'pending'
-                            ? 'warning'
-                            : 'error'
+                              ? 'warning'
+                              : 'error'
                         }
                         size="small"
                       />
                     </TableCell>
                     <TableCell>{formatDate(order.createdAt!)}</TableCell>
                     <TableCell>
-                      <IconButton 
-                        color="primary" 
+                      <IconButton
+                        color="primary"
                         size="small"
                         onClick={() => handleOpenDialog(order)}
                       >
                         <IconEdit size={18} />
                       </IconButton>
-                      <IconButton 
-                        color="error" 
+                      <IconButton
+                        color="error"
                         size="small"
                         onClick={() => deleteOrderMutation.mutate(order.id!)}
                       >
                         <IconTrash size={18} />
                       </IconButton>
-                      <IconButton 
-                        color="info" 
+                      <IconButton
+                        color="info"
                         size="small"
                         onClick={() => handlePrintInvoice(order)}
                       >

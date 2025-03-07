@@ -12,6 +12,7 @@ import {
   Select,
   MenuItem,
   Grid,
+  Typography,
 } from '@mui/material';
 import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
@@ -87,7 +88,7 @@ export function AddCategoryDialog({ open, onClose, onSuccess }: AddCategoryDialo
                     <ImageUpload
                       value={field.value}
                       onChange={(url) => setValue('imageUrl', url)}
-                      aspectRatio={16/9}
+                      aspectRatio={16 / 9}
                     />
                     {errors.imageUrl && (
                       <Typography color="error" variant="caption" sx={{ mt: 1 }}>

@@ -2,6 +2,7 @@ import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
 import axios from "axios";
 import API_ENDPOINTS from "@/lib/apis";
+import { Employee } from "@/interfaces";
 
 const handler = NextAuth({
   providers: [
@@ -44,15 +45,16 @@ const handler = NextAuth({
   callbacks: {
     async jwt({ token, user }) {
       if (user) {
-        token.role = user.role;
-        token.token = user.token;
+        const userData = user as Employee;
+        token.role = userData.role;
+        token.token = userData.token;
       }
       return token;
     },
     async session({ session, token }) {
       if (session.user) {
-        session.user.role = token.role;
-        session.user.token = token.token;
+        session.user = token.user as Employee;
+        session.accessToken = token.accessToken as string;
       }
       return session;
     },

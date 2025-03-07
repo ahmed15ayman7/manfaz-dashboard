@@ -52,7 +52,7 @@ export default function UserDetailsPage() {
 
   if (!user) return null;
 
-  const roleColors = {
+  const roleColors: Record<string, "error" | "default" | "success" | "info" | "warning" | "primary" | "secondary"> = {
     user: 'primary',
     store: 'success',
     worker: 'warning',

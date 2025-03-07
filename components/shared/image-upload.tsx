@@ -24,6 +24,7 @@ interface ImageUploadProps {
   maxSize?: number; // بالميجابايت
   aspectRatio?: number;
   className?: string;
+  label?: string;
 }
 
 export const ImageUpload = ({
@@ -32,6 +33,7 @@ export const ImageUpload = ({
   maxSize = 5, // 5 ميجابايت كحد أقصى افتراضي
   aspectRatio = 1, // مربع افتراضي
   className = '',
+  label = '',
 }: ImageUploadProps) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -165,6 +167,7 @@ export const ImageUpload = ({
 
   return (
     <Box className={`relative ${className}`}>
+      {label && <Typography variant="subtitle2" gutterBottom>{label}</Typography>}
       {/* منطقة رفع الصورة */}
       <Box
         className={`

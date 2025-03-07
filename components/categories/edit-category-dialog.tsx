@@ -27,7 +27,7 @@ const categorySchema = z.object({
   subName: z.string().optional(),
   description: z.string().min(10, 'الوصف يجب أن يكون 10 أحرف على الأقل'),
   type: z.enum(['service', 'delivery']),
-  status: z.enum(['active', 'inactive']),
+  status: z.enum(['active', 'inactive', 'archived']),
   imageUrl: z.string().min(1, 'الصورة مطلوبة'),
   info: z.string().optional(),
   price: z.number().optional(),
@@ -62,7 +62,7 @@ export function EditCategoryDialog({
       subName: category.subName,
       description: category.description,
       type: category.type,
-      status: category.status,
+      status: category.status as "active" | "inactive" | "archived",
       imageUrl: category.imageUrl,
       info: category.info,
       price: category.price,
@@ -101,7 +101,7 @@ export function EditCategoryDialog({
                     <ImageUpload
                       value={field.value}
                       onChange={(url) => setValue('imageUrl', url)}
-                      aspectRatio={16/9}
+                      aspectRatio={16 / 9}
                     />
                     {errors.imageUrl && (
                       <Typography color="error" variant="caption" sx={{ mt: 1 }}>

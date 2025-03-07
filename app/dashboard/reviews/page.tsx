@@ -49,12 +49,12 @@ export default function ReviewsPage() {
   const queryClient = useQueryClient();
 
   // استدعاء بيانات المراجعات
-  const { data: workers } = useQuery<Worker[]>({
+  const { data: workers } = useQuery<Review[]>({
     queryKey: ['workers'],
     queryFn: async () => {
       const response = await axios.get(API_ENDPOINTS.workers.getAll({}));
       const workers = response.data;
-      const reviews = workers.reduce((acc: Review[], worker) => {
+      const reviews = workers.reduce((acc: Review[], worker: Worker) => {
         return [...acc, ...worker.reviews];
       }, []);
       return reviews;
@@ -268,15 +268,15 @@ export default function ReviewsPage() {
                     </TableCell>
                     <TableCell>{formatDate(review.createdAt)}</TableCell>
                     <TableCell>
-                      <IconButton 
-                        color="primary" 
+                      <IconButton
+                        color="primary"
                         size="small"
                         onClick={() => handleOpenDialog(review)}
                       >
                         <IconEdit size={18} />
                       </IconButton>
-                      <IconButton 
-                        color="error" 
+                      <IconButton
+                        color="error"
                         size="small"
                         onClick={() => deleteReviewMutation.mutate({ workerId: review.workerId, reviewId: review.id })}
                       >

@@ -13,6 +13,7 @@ const tajawal = Tajawal({
 export const metadata: Metadata = {
   title: "منصة المُنفذ | لوحة التحكم",
   description: "منصة المُنفذ لإدارة الخدمات المنزلية وخدمات التوصيل",
+
 };
 
 export default function RootLayout({

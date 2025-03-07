@@ -1,8 +1,8 @@
 'use client';
 
-import { Topbar } from '@/components/dashboard/Topbar';
-import { Sidebar } from '@/components/dashboard/Sidebar';
-import { Providers } from '@/components/Providers';
+import { Topbar } from '@/components/dashboard/topbar';
+import { Sidebar } from '@/components/dashboard/sidebar';
+import { Providers } from '@/components/providers';
 
 export default function DashboardLayout({
   children,
@@ -14,7 +14,7 @@ export default function DashboardLayout({
       <div className="flex h-screen overflow-hidden">
         <Sidebar />
         <div className="flex flex-1 flex-col overflow-hidden">
-          <Topbar />
+          <Topbar onDrawerToggle={() => { }} />
           <main className="flex-1 overflow-y-auto bg-background p-4">
             {children}
           </main>

@@ -149,8 +149,8 @@ export interface Order {
     description?: string;
     imageUrl?: string;
     locationId: string;
-    location?:UserLocation;
-    notes:string;
+    location?: UserLocation;
+    notes: string;
     price?: number;
     duration?: number;
     status: OrderStatus;
@@ -186,9 +186,9 @@ export interface Worker {
     experiences: WorkExperience[];
     reviews: Review[];
     orders: Order[];
-  }
-  
-  export interface WorkExperience {
+}
+
+export interface WorkExperience {
     id: string;
     workerId: string;
     worker: Worker;
@@ -198,19 +198,21 @@ export interface Worker {
     description: string;
     createdAt: Date;
     updatedAt: Date;
-  }
-  
-  export interface Review {
+}
+
+export interface Review {
     id: string;
     workerId: string;
     worker: Worker;
     userId: string;
+    orderId: string;
+    order?: Order;
     user: User;
     rating: number;
     comment: string;
     createdAt: Date;
     updatedAt: Date;
-  }
+}
 export interface DeliveryDriver {
     id: string;
     userId: string;
@@ -360,92 +362,93 @@ export type EmployeeRole = "customer_service" | "sales" | "supervisor" | "admin"
 
 // واجهة صلاحيات الموظف
 export interface EmployeePermissions {
-  // إدارة الطلبات
-  viewOrders: boolean;
-  updateOrders: boolean;
-  deleteOrders: boolean;
+    // إدارة الطلبات
+    viewOrders: boolean;
+    updateOrders: boolean;
+    deleteOrders: boolean;
 
-  // إدارة العملاء
-  viewCustomers: boolean;
-  updateCustomers: boolean;
+    // إدارة العملاء
+    viewCustomers: boolean;
+    updateCustomers: boolean;
 
-  // إدارة الخدمات
-  viewServices: boolean;
-  createServices: boolean;
-  updateServices: boolean;
-  deleteServices: boolean;
+    // إدارة الخدمات
+    viewServices: boolean;
+    createServices: boolean;
+    updateServices: boolean;
+    deleteServices: boolean;
 
-  // إدارة العروض والخصومات
-  viewOffers: boolean;
-  createOffers: boolean;
-  updateOffers: boolean;
-  deleteOffers: boolean;
+    // إدارة العروض والخصومات
+    viewOffers: boolean;
+    createOffers: boolean;
+    updateOffers: boolean;
+    deleteOffers: boolean;
 
-  // إدارة التصنيفات
-  viewCategories: boolean;
-  createCategories: boolean;
-  updateCategories: boolean;
-  deleteCategories: boolean;
+    // إدارة التصنيفات
+    viewCategories: boolean;
+    createCategories: boolean;
+    updateCategories: boolean;
+    deleteCategories: boolean;
 
-  // إدارة المتاجر
-  viewStores: boolean;
-  createStores: boolean;
-  updateStores: boolean;
-  deleteStores: boolean;
+    // إدارة المتاجر
+    viewStores: boolean;
+    createStores: boolean;
+    updateStores: boolean;
+    deleteStores: boolean;
 
-  // إدارة مقدمي الخدمات
-  viewProviders: boolean;
-  approveProviders: boolean;
-  updateProviders: boolean;
-  deleteProviders: boolean;
+    // إدارة مقدمي الخدمات
+    viewProviders: boolean;
+    approveProviders: boolean;
+    updateProviders: boolean;
+    deleteProviders: boolean;
 
-  // إدارة المحافظ والمدفوعات
-  viewWallets: boolean;
-  manageTransactions: boolean;
+    // إدارة المحافظ والمدفوعات
+    viewWallets: boolean;
+    manageTransactions: boolean;
 
-  // إدارة التقارير
-  viewBasicReports: boolean;
-  viewAdvancedReports: boolean;
-  exportReports: boolean;
+    // إدارة التقارير
+    viewBasicReports: boolean;
+    viewAdvancedReports: boolean;
+    exportReports: boolean;
 
-  // إدارة الموظفين
-  viewEmployees: boolean;
-  createEmployees: boolean;
-  updateEmployees: boolean;
-  deleteEmployees: boolean;
-  managePermissions: boolean;
+    // إدارة الموظفين
+    viewEmployees: boolean;
+    createEmployees: boolean;
+    updateEmployees: boolean;
+    deleteEmployees: boolean;
+    managePermissions: boolean;
 
-  // إدارة النظام
-  manageSettings: boolean;
-  viewAuditLogs: boolean;
-  manageBackups: boolean;
+    // إدارة النظام
+    manageSettings: boolean;
+    viewAuditLogs: boolean;
+    manageBackups: boolean;
 }
 
 // واجهة نشاط الموظف
 export interface EmployeeActivity {
-  id: string;
-  employeeId: string;
-  action: string;
-  details: string;
-  oldData?: any;
-  newData?: any;
-  ipAddress?: string;
-  createdAt: Date;
+    id: string;
+    employeeId: string;
+    action: string;
+    details: string;
+    oldData?: any;
+    newData?: any;
+    ipAddress?: string;
+    createdAt: Date;
 }
 
 // واجهة الموظف
 export interface Employee {
-  id: string;
-  name: string;
-  email: string;
-  phone: string;
-  password: string;
-  imageUrl?: string;
-  role: EmployeeRole;
-  permissions: EmployeePermissions;
-  isActive: boolean;
-  lastLoginAt?: Date;
-  activities?: EmployeeActivity[];
-  createdAt: Date;
-  updatedAt: Date;
+    id: string;
+    name: string;
+    email: string;
+    phone: string;
+    password: string;
+    imageUrl?: string;
+    token?: string;
+    role: EmployeeRole;
+    permissions: EmployeePermissions;
+    isActive: boolean;
+    lastLoginAt?: Date;
+    activities?: EmployeeActivity[];
+    createdAt: Date;
+    updatedAt: Date;
 }

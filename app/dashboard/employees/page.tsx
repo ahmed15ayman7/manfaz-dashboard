@@ -326,10 +326,10 @@ export default function EmployeesPage() {
                           employee.role === 'admin'
                             ? 'error'
                             : employee.role === 'supervisor'
-                            ? 'warning'
-                            : employee.role === 'sales'
-                            ? 'info'
-                            : 'success'
+                              ? 'warning'
+                              : employee.role === 'sales'
+                                ? 'info'
+                                : 'success'
                         }
                       />
                     </TableCell>
@@ -554,6 +554,7 @@ export default function EmployeesPage() {
         <DialogContent>
           {pdfData && (
             <PDFDocument
+              title={pdfData.title}
               template="report"
               data={pdfData}
             />

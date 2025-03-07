@@ -56,7 +56,7 @@ export function EditUserDialog({ open, onClose, onSuccess, user }: EditUserDialo
       name: user.name,
       email: user.email,
       phone: user.phone,
-      role: user.role,
+      role: user.role as "user" | "store" | "worker",
       imageUrl: user.imageUrl,
     },
   });

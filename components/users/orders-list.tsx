@@ -98,7 +98,7 @@ export function OrdersList({ userId }: OrdersListProps) {
               <TableCell>
                 <Chip
                   label={getStatusText(order.status)}
-                  color={getStatusColor(order.status)}
+                  color={getStatusColor(order.status) as "default" | "error" | "primary" | "secondary" | "info" | "success" | "warning"}
                   size="small"
                 />
               </TableCell>

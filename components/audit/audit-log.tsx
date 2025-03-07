@@ -27,7 +27,7 @@ import {
   Grid,
   Pagination,
 } from '@mui/material';
-import { DatePicker } from '@mui/x-date-pickers';
+import { DatePicker, LocalizationProvider } from '@mui/x-date-pickers';
 import {
   IconEye,
   IconFileExport,
@@ -38,6 +38,7 @@ import axios from 'axios';
 import API_ENDPOINTS from '@/lib/apis';
 import { ExcelExport } from '@/components/shared/excel-export';
 import { PDFDocument } from '@/components/shared/pdf-document';
+import { AdapterDateFns } from '../../node_modules/@mui/x-date-pickers/AdapterDateFns/AdapterDateFns';
 
 interface AuditLog {
   id: string;
@@ -129,9 +130,8 @@ export default function AuditLog() {
   // تحضير بيانات تقرير PDF
   const pdfData = {
     title: 'سجل النشاطات',
-    subtitle: `${filters.startDate ? new Date(filters.startDate).toLocaleDateString('ar-SA') : ''} - ${
-      filters.endDate ? new Date(filters.endDate).toLocaleDateString('ar-SA') : ''
-    }`,
+    subtitle: `${filters.startDate ? new Date(filters.startDate).toLocaleDateString('ar-SA') : ''} - ${filters.endDate ? new Date(filters.endDate).toLocaleDateString('ar-SA') : ''
+      }`,
     data: excelData,
   };
 
@@ -181,10 +181,10 @@ export default function AuditLog() {
                         log.action.includes('create')
                           ? 'success'
                           : log.action.includes('update')
-                          ? 'warning'
-                          : log.action.includes('delete')
-                          ? 'error'
-                          : 'default'
+                            ? 'warning'
+                            : log.action.includes('delete')
+                              ? 'error'
+                              : 'default'
                       }
                       size="small"
                     />
@@ -229,28 +229,32 @@ export default function AuditLog() {
         <DialogContent>
           <Grid container spacing={2} sx={{ mt: 1 }}>
             <Grid item xs={12} md={6}>
-              <DatePicker
-                label="من تاريخ"
-                value={filters.startDate}
-                onChange={(date) => handleFilterChange('startDate', date)}
-                slotProps={{
-                  textField: {
-                    fullWidth: true,
-                  },
-                }}
-              />
+              <LocalizationProvider dateAdapter={AdapterDateFns}>
+                <DatePicker
+                  label="من تاريخ"
+                  value={filters.startDate}
+                  onChange={(date: any) => handleFilterChange('startDate', date)}
+                  slotProps={{
+                    textField: {
+                      fullWidth: true,
+                    },
+                  }}
+                />
+              </LocalizationProvider>
             </Grid>
             <Grid item xs={12} md={6}>
-              <DatePicker
-                label="إلى تاريخ"
-                value={filters.endDate}
-                onChange={(date) => handleFilterChange('endDate', date)}
-                slotProps={{
-                  textField: {
-                    fullWidth: true,
-                  },
-                }}
-              />
+              <LocalizationProvider dateAdapter={AdapterDateFns}>
+                <DatePicker
+                  label="إلى تاريخ"
+                  value={filters.endDate}
+                  onChange={(date: any) => handleFilterChange('endDate', date)}
+                  slotProps={{
+                    textField: {
+                      fullWidth: true,
+                    },
+                  }}
+                />
+              </LocalizationProvider>
             </Grid>
             <Grid item xs={12}>
               <FormControl fullWidth>
@@ -329,10 +333,10 @@ export default function AuditLog() {
                     selectedLog.action.includes('create')
                       ? 'success'
                       : selectedLog.action.includes('update')
-                      ? 'warning'
-                      : selectedLog.action.includes('delete')
-                      ? 'error'
-                      : 'default'
+                        ? 'warning'
+                        : selectedLog.action.includes('delete')
+                          ? 'error'
+                          : 'default'
                   }
                   size="small"
                 />

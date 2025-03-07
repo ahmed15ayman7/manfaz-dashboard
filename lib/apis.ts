@@ -37,6 +37,12 @@ const API_ENDPOINTS = {
     getById: (id: string, params: Record<string, any>, isBaseUrl: boolean = true) => appendQueryParams(`/workers/${id}`, params, isBaseUrl),
     update: (id: string, params: Record<string, any>, isBaseUrl: boolean = true) => appendQueryParams(`/workers/${id}`, params, isBaseUrl),
     delete: (id: string, params: Record<string, any>, isBaseUrl: boolean = true) => appendQueryParams(`/workers/${id}`, params, isBaseUrl),
+    reviews: {
+      getAll: (workerId: string, params: Record<string, any>, isBaseUrl: boolean = true) => appendQueryParams(`/workers/${workerId}/reviews`, params, isBaseUrl),
+      create: (workerId: string, params: Record<string, any>, isBaseUrl: boolean = true) => appendQueryParams(`/workers/${workerId}/reviews`, params, isBaseUrl),
+      update: (workerId: string, id: string, params: Record<string, any>, isBaseUrl: boolean = true) => appendQueryParams(`/workers/${workerId}/reviews/${id}`, params, isBaseUrl),
+      delete: (workerId: string, id: string, params: Record<string, any>, isBaseUrl: boolean = true) => appendQueryParams(`/workers/${workerId}/reviews/${id}`, params, isBaseUrl),
+    },
   },
   deliveryDrivers: {
     getAll: (params: Record<string, any>, isBaseUrl: boolean = true) => appendQueryParams('/delivery-drivers', params, isBaseUrl),
@@ -86,6 +92,8 @@ const API_ENDPOINTS = {
       getAll: (storeId: string, params: Record<string, any>, isBaseUrl: boolean = true) => appendQueryParams(`/stores/${storeId}/rewards`, params, isBaseUrl),
       redeem: (id: string, params: Record<string, any>, isBaseUrl: boolean = true) => appendQueryParams(`/rewards/${id}/redeem`, params, isBaseUrl),
       getUserRewards: (userId: string, params: Record<string, any>, isBaseUrl: boolean = true) => appendQueryParams(`/users/${userId}/rewards`, params, isBaseUrl),
+      update: (id: string, params: Record<string, any>, isBaseUrl: boolean = true) => appendQueryParams(`/rewards/${id}`, params, isBaseUrl),
+      delete: (id: string, params: Record<string, any>, isBaseUrl: boolean = true) => appendQueryParams(`/rewards/${id}`, params, isBaseUrl),
     },
     workingHours: {
       get: (storeId: string, params: Record<string, any>, isBaseUrl: boolean = true) => appendQueryParams(`/stores/${storeId}/working-hours`, params, isBaseUrl),
@@ -132,6 +140,19 @@ const API_ENDPOINTS = {
     update: (params: Record<string, any>, isBaseUrl: boolean = true) => appendQueryParams('/settings', params, isBaseUrl),
     backup: (params: Record<string, any>, isBaseUrl: boolean = true) => appendQueryParams('/settings/backup', params, isBaseUrl),
     restore: (params: Record<string, any>, isBaseUrl: boolean = true) => appendQueryParams('/settings/restore', params, isBaseUrl),
+  },
+  wallets: {
+    getAll: (params: Record<string, any>, isBaseUrl: boolean = true) => appendQueryParams('/wallets', params, isBaseUrl),
+    getById: (id: string, params: Record<string, any>, isBaseUrl: boolean = true) => appendQueryParams(`/wallets/${id}`, params, isBaseUrl),
+    create: (params: Record<string, any>, isBaseUrl: boolean = true) => appendQueryParams('/wallets', params, isBaseUrl),
+    update: (id: string, params: Record<string, any>, isBaseUrl: boolean = true) => appendQueryParams(`/wallets/${id}`, params, isBaseUrl),
+    delete: (id: string, params: Record<string, any>, isBaseUrl: boolean = true) => appendQueryParams(`/wallets/${id}`, params, isBaseUrl),
+    transactions: {
+      getAll: (walletId: string, params: Record<string, any>, isBaseUrl: boolean = true) => appendQueryParams(`/wallets/${walletId}/transactions`, params, isBaseUrl),
+      create: (walletId: string, params: Record<string, any>, isBaseUrl: boolean = true) => appendQueryParams(`/wallets/${walletId}/transactions`, params, isBaseUrl),
+      update: (walletId: string, id: string, params: Record<string, any>, isBaseUrl: boolean = true) => appendQueryParams(`/wallets/${walletId}/transactions/${id}`, params, isBaseUrl),
+      delete: (walletId: string, id: string, params: Record<string, any>, isBaseUrl: boolean = true) => appendQueryParams(`/wallets/${walletId}/transactions/${id}`, params, isBaseUrl),
+    },
   },
 };
 

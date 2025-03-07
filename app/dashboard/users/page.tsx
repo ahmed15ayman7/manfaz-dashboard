@@ -1,6 +1,7 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, Suspense } from 'react';
+import { Skeleton } from '@mui/material'
 import {
   Box,
   Typography,
@@ -39,7 +40,7 @@ import { SearchPagination } from '@/components/shared/search-pagination';
 import { SkeletonLoader } from '@/components/shared/skeleton-loader';
 import { DataTable } from '@/components/shared/data-table';
 
-export default function UsersPage() {
+function UsersPage() {
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
   const [searchQuery, setSearchQuery] = useState('');
@@ -158,9 +159,9 @@ export default function UsersPage() {
     { field: 'phone', headerName: 'رقم الهاتف', width: 150 },
     { field: 'accountType', headerName: 'نوع الحساب', width: 150 },
     { field: 'role', headerName: 'الدور', width: 150 },
-    { 
-      field: 'createdAt', 
-      headerName: 'تاريخ التسجيل', 
+    {
+      field: 'createdAt',
+      headerName: 'تاريخ التسجيل',
       width: 200,
       renderCell: (params: any) => new Date(params.value).toLocaleDateString('ar-SA')
     },
@@ -169,9 +170,9 @@ export default function UsersPage() {
   // حساب الإحصائيات
   const stats = {
     totalUsers: data?.total || 0,
-    activeUsers: data?.users?.filter(u => u.role === 'user').length || 0,
-    stores: data?.users?.filter(u => u.role === 'store').length || 0,
-    workers: data?.users?.filter(u => u.role === 'worker').length || 0,
+    activeUsers: data?.users?.filter((u: User) => u.role === 'user').length || 0,
+    stores: data?.users?.filter((u: User) => u.role === 'store').length || 0,
+    workers: data?.users?.filter((u: User) => u.role === 'worker').length || 0,
   };
 
   // تعريف أعمدة ملف Excel
@@ -186,15 +187,15 @@ export default function UsersPage() {
   ];
 
   // تحضير بيانات Excel
-  const excelData = data?.users?.map(user => ({
+  const excelData = data?.users?.map((user: User) => ({
     name: user.name,
     email: user.email,
     phone: user.phone,
     role: user.role === 'user' ? 'مستخدم' :
-          user.role === 'store' ? 'متجر' : 'مقدم خدمة',
+      user.role === 'store' ? 'متجر' : 'مقدم خدمة',
     ordersCount: user.orders?.length || 0,
     balance: user.wallet?.balance || 0,
-    createdAt: new Date(user.createdAt).toLocaleDateString('ar-SA'),
+    createdAt: user.createdAt ? new Date(user.createdAt).toLocaleDateString('ar-SA') : '',
   })) || [];
 
   // تحضير بيانات التقرير
@@ -214,8 +215,8 @@ export default function UsersPage() {
           البريد الإلكتروني: ${selectedUser.email}
           رقم الهاتف: ${selectedUser.phone}
           نوع الحساب: ${selectedUser.role === 'user' ? 'مستخدم' :
-                        selectedUser.role === 'store' ? 'متجر' : 'مقدم خدمة'}
-          تاريخ التسجيل: ${new Date(selectedUser.createdAt).toLocaleDateString('ar-SA')}
+            selectedUser.role === 'store' ? 'متجر' : 'مقدم خدمة'}
+          تاريخ التسجيل: ${selectedUser.createdAt ? new Date(selectedUser.createdAt).toLocaleDateString('ar-SA') : ''}
         `
       },
       {
@@ -235,14 +236,14 @@ export default function UsersPage() {
         <Typography variant="h5" fontWeight="bold">
           إدارة المستخدمين
         </Typography>
-          <Button
-            variant="contained"
-            startIcon={<IconPlus />}
+        <Button
+          variant="contained"
+          startIcon={<IconPlus />}
           onClick={() => handleOpenDialog()}
           sx={{ backgroundColor: 'primary.main' }}
-          >
+        >
           إضافة مستخدم جديد
-          </Button>
+        </Button>
       </Box>
 
       {/* الإحصائيات */}
@@ -433,4 +434,9 @@ export default function UsersPage() {
       </Dialog>
     </Box>
   );
-} 
+}
+export default function Page() {
+  return <Suspense fallback={<Skeleton variant="rectangular" height="100vh" />}>
+    <UsersPage />
+  </Suspense>
+}

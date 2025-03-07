@@ -200,8 +200,8 @@ export default function ServicesPage() {
   const stats = {
     totalServices: filteredServices?.length || 0,
     availableServices: filteredServices?.filter(s => s.availability).length || 0,
-    averagePrice: filteredServices?.reduce((sum, service) => sum + (service.price || 0), 0) / (filteredServices?.length || 1),
-    averageDuration: filteredServices?.reduce((sum, service) => sum + (service.duration || 0), 0) / (filteredServices?.length || 1),
+    averagePrice: filteredServices ? filteredServices?.reduce((sum, service) => sum + (service.price || 0), 0) / (filteredServices?.length || 1) : 0,
+    averageDuration: filteredServices ? filteredServices?.reduce((sum, service) => sum + (service.duration || 0), 0) / (filteredServices?.length || 1) : 0,
   };
 
   return (
@@ -346,15 +346,15 @@ export default function ServicesPage() {
                       />
                     </TableCell>
                     <TableCell>
-                      <IconButton 
-                        color="primary" 
+                      <IconButton
+                        color="primary"
                         size="small"
                         onClick={() => handleOpenDialog(service)}
                       >
                         <IconEdit size={18} />
                       </IconButton>
-                      <IconButton 
-                        color="error" 
+                      <IconButton
+                        color="error"
                         size="small"
                         onClick={() => deleteServiceMutation.mutate(service.id)}
                       >
