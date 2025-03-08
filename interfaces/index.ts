@@ -6,8 +6,7 @@ export interface User {
     phone: string;
     password: string;
     imageUrl?: string;
-    accountType: "user" | "employee";
-    role: UserRole | EmployeeRole;
+    role: UserRole;
     verificationCode?: number;
     createdAt?: Date;
     updatedAt?: Date;
@@ -16,7 +15,6 @@ export interface User {
     orders: Order[];
     wallet?: Wallet;
     locations: UserLocation[];
-    employeeData?: Employee;
 }
 
 type UserRole = "user" | "store" | "worker";
@@ -119,6 +117,8 @@ export interface Store {
     workingHours: StoreWorkingHours[];
     categoryId?: string;
     category?: Category;
+    userId?: string;
+    user?: User;
     rating: number; // التقييم
     reviewsCount: number; // عدد التقييمات
     isActive: boolean; // حالة المتجر
@@ -137,7 +137,7 @@ export interface Store {
     rewards: Reward[]; // المكافآت
 }
 export interface Order {
-    id?: string;
+    id: string;
     userId: string;
     user?: User;
     serviceId: string;
@@ -160,10 +160,12 @@ export interface Order {
     updatedAt?: Date;
     storeId?: string;
     store?: Store;
+    scheduleOrder?: ScheduleOrder
 }
 export type OrderStatus = "pending" | "in_progress" | "completed" | "canceled";
 
 export type PaymentStatus = "pending" | "paid" | "failed";
+
 export interface Worker {
     id: string;
     userId: string;
@@ -186,6 +188,68 @@ export interface Worker {
     experiences: WorkExperience[];
     reviews: Review[];
     orders: Order[];
+    earnings: {
+        date: string;
+        amount: number;
+    }[];
+    schedules: Schedule[];
+}
+// Enums
+export enum StatusEnum {
+    SCHEDULED = "SCHEDULED",
+    IN_PROGRESS = "IN_PROGRESS",
+    COMPLETED = "COMPLETED",
+    CANCELED = "CANCELED",
+}
+
+export enum ShiftEnum {
+    MORNING = "MORNING",
+    EVENING = "EVENING",
+    NIGHT = "NIGHT",
+}
+
+export enum WorkerTypeEnum {
+    DRIVER = "DRIVER",
+    TECHNICIAN = "TECHNICIAN",
+    ELECTRICIAN = "ELECTRICIAN",
+    PLUMBER = "PLUMBER",
+    OTHER = "OTHER",
+}
+
+export enum PriorityEnum {
+    LOW = "LOW",
+    MEDIUM = "MEDIUM",
+    HIGH = "HIGH",
+}
+export interface ScheduleOrder {
+    id: string;
+    scheduleId: string;
+    orderId: string;
+    order: Order;
+    schedule: Schedule;
+    createdAt: Date;
+    updatedAt: Date;
+}
+
+// Schedule Interface
+export interface Schedule {
+    id: string;
+    workerId: string;
+    scheduledTime: Date;
+    date: Date;
+    day: string; // e.g., "Monday", "Tuesday"
+    shiftType: ShiftEnum;
+    worker: Worker;
+    location?: string;
+    scheduleOrders: ScheduleOrder[]; // Array of Order IDs
+    maxOrders: number;
+    ordersCount: number;
+    isFull: boolean;
+    status: StatusEnum;
+    priority: PriorityEnum;
+    notes?: string;
+    createdAt: Date;
+    updatedAt: Date;
 }
 
 export interface WorkExperience {
@@ -206,7 +270,7 @@ export interface Review {
     worker: Worker;
     userId: string;
     orderId: string;
-    order?: Order;
+    order: Order;
     user: User;
     rating: number;
     comment: string;
@@ -370,6 +434,13 @@ export interface EmployeePermissions {
     // إدارة العملاء
     viewCustomers: boolean;
     updateCustomers: boolean;
+    deleteCustomers: boolean;
+
+    // إدارة المواقع والعناوين
+    viewLocations: boolean;
+    createLocations: boolean;
+    updateLocations: boolean;
+    deleteLocations: boolean;
 
     // إدارة الخدمات
     viewServices: boolean;

@@ -108,6 +108,11 @@ const permissionLabels: Record<keyof EmployeePermissions, string> = {
   manageSettings: 'إدارة إعدادات النظام',
   viewAuditLogs: 'عرض سجلات النظام',
   manageBackups: 'إدارة النسخ الاحتياطية',
+  deleteCustomers: 'حذف العملاء',
+  viewLocations: 'عرض المواقع',
+  createLocations: 'إضافة مواقع',
+  updateLocations: 'تحديث المواقع',
+  deleteLocations: 'حذف المواقع',
 };
 
 const defaultPermissions: Record<EmployeeRole, (keyof EmployeePermissions)[]> = {

@@ -154,6 +154,15 @@ const API_ENDPOINTS = {
       delete: (walletId: string, id: string, params: Record<string, any>, isBaseUrl: boolean = true) => appendQueryParams(`/wallets/${walletId}/transactions/${id}`, params, isBaseUrl),
     },
   },
+  dashboard: {
+    getStats: (params: Record<string, any>, isBaseUrl: boolean = true) => appendQueryParams('/dashboard/stats', params, isBaseUrl),
+  },
+  locations: {
+    getAll: (params: Record<string, any>, isBaseUrl: boolean = true) => appendQueryParams('/locations', params, isBaseUrl),
+    create: (params: Record<string, any>, isBaseUrl: boolean = true) => appendQueryParams('/locations', params, isBaseUrl),
+    update: (id: string, params: Record<string, any>, isBaseUrl: boolean = true) => appendQueryParams(`/locations/${id}`, params, isBaseUrl),
+    delete: (id: string, params: Record<string, any>, isBaseUrl: boolean = true) => appendQueryParams(`/locations/${id}`, params, isBaseUrl),
+  },
 };
 
 export default API_ENDPOINTS;

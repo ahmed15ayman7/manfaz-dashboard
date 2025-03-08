@@ -20,6 +20,7 @@ import axios from 'axios';
 import API_ENDPOINTS from '@/lib/apis';
 import { PermissionGuard } from '@/components/common/PermissionGuard';
 import { EmployeePermissions } from '@/interfaces';
+import axiosInstance from '@/lib/axios';
 
 interface DashboardStats {
   users: number;
@@ -42,7 +43,7 @@ export default function DashboardPage() {
   const { data: stats, isLoading } = useQuery<DashboardStats>({
     queryKey: ['dashboard-stats'],
     queryFn: async () => {
-      const response = await axios.get('/api/dashboard/stats');
+      const response = await axiosInstance.get(API_ENDPOINTS.dashboard.getStats({}));
       return response.data;
     },
   });
@@ -70,7 +71,6 @@ export default function DashboardPage() {
     stores = 0,
     categories = 0,
     wallets = 0,
-    rating = 0,
     services = 0,
     offers = 0,
     employees = 0,
@@ -231,7 +231,7 @@ export default function DashboardPage() {
             />
           </Grid>
         )}
-      
+
       </Grid>
 
       <Grid container spacing={3}>

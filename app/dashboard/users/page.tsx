@@ -82,13 +82,12 @@ function UsersPage() {
     password: '',
     imageUrl: '',
     role: 'user',
-    accountType: 'user',
   });
 
   const queryClient = useQueryClient();
 
   // استدعاء بيانات المستخدمين مع البحث والتنقل
-  const { data:users, isLoading } = useQuery({
+  const { data: users, isLoading } = useQuery({
     queryKey: ['users', searchQuery, page, limit],
     queryFn: async () => {
       const response = await axios.get(API_ENDPOINTS.users.getAll({
@@ -139,8 +138,8 @@ function UsersPage() {
   const filteredUsers = users
     ?.filter((user: User) => {
       const matchesSearch = user.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                          user.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                          user.phone.includes(searchQuery);
+        user.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        user.phone.includes(searchQuery);
       const matchesRole = filterRole === 'all' || user.role === filterRole;
       return matchesSearch && matchesRole;
     })
@@ -181,7 +180,7 @@ function UsersPage() {
     email: user.email,
     phone: user.phone,
     role: user.role === 'user' ? 'مستخدم' :
-          user.role === 'store' ? 'متجر' : 'مقدم خدمة',
+      user.role === 'store' ? 'متجر' : 'مقدم خدمة',
     ordersCount: user.orders?.length || 0,
     balance: user.wallet?.balance || 0,
     createdAt: user.createdAt ? formatDate(user.createdAt) : '',
@@ -196,7 +195,6 @@ function UsersPage() {
         phone: user.phone,
         imageUrl: user.imageUrl,
         role: user.role,
-        accountType: user.accountType,
       });
     } else {
       setEditingUser(null);
@@ -207,7 +205,6 @@ function UsersPage() {
         password: '',
         imageUrl: '',
         role: 'user',
-        accountType: 'user',
       });
     }
     setOpenDialog(true);
@@ -223,7 +220,6 @@ function UsersPage() {
       password: '',
       imageUrl: '',
       role: 'user',
-      accountType: 'user',
     });
   };
 
@@ -458,11 +454,11 @@ function UsersPage() {
                       <Chip
                         label={
                           user.role === 'user' ? 'مستخدم' :
-                          user.role === 'store' ? 'متجر' : 'مقدم خدمة'
+                            user.role === 'store' ? 'متجر' : 'مقدم خدمة'
                         }
                         color={
                           user.role === 'user' ? 'primary' :
-                          user.role === 'store' ? 'warning' : 'success'
+                            user.role === 'store' ? 'warning' : 'success'
                         }
                         size="small"
                       />

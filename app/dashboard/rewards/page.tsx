@@ -44,10 +44,10 @@ import {
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import axios from 'axios';
 import API_ENDPOINTS from '@/lib/apis';
-import type { Reward, User } from '@/interfaces';
+import type { Reward, User, Store } from '@/interfaces';
 import { PermissionGuard } from '@/components/common/PermissionGuard';
 import { formatNumber } from '@/lib/utils';
-
+import axiosInstance from '@/lib/axios';
 export default function RewardsPage() {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
@@ -63,22 +63,30 @@ export default function RewardsPage() {
     points: 0,
     description: '',
   });
+  const [storeId, setStoreId] = useState('');
 
   const queryClient = useQueryClient();
 
-  // استدعاء البيانات
-  const { data: rewards, isLoading } = useQuery<Reward[]>({
-    queryKey: ['rewards'],
+  let { data: stores, isLoading: isLoadingStores } = useQuery<Store[]>({
+    queryKey: ['stores'],
     queryFn: async () => {
-      const response = await axios.get(API_ENDPOINTS.rewards.getAll({}));
+      const response = await axiosInstance.get(API_ENDPOINTS.stores.getAll({}, false));
       return response.data;
     },
+  });
+  const { data: rewards, isLoading, refetch } = useQuery<Reward[]>({
+    queryKey: ['rewards'],
+    queryFn: async () => {
+      const response = await axiosInstance.get(API_ENDPOINTS.stores.rewards.getAll(storeId, {}, false));
+      return response.data;
+    },
+    enabled: !!storeId,
   });
 
   const { data: users } = useQuery<User[]>({
     queryKey: ['users'],
     queryFn: async () => {
-      const response = await axios.get(API_ENDPOINTS.users.getAll({}));
+      const response = await axiosInstance.get(API_ENDPOINTS.users.getAll({}, false));
       return response.data;
     },
   });
@@ -86,7 +94,7 @@ export default function RewardsPage() {
   // إضافة مكافأة جديدة
   const addRewardMutation = useMutation({
     mutationFn: async (reward: typeof rewardData) => {
-      const response = await axios.post(API_ENDPOINTS.rewards.create({}), reward);
+      const response = await axiosInstance.post(API_ENDPOINTS.stores.rewards.create({}, false), reward);
       return response.data;
     },
     onSuccess: () => {
@@ -98,7 +106,7 @@ export default function RewardsPage() {
   // تحديث مكافأة
   const updateRewardMutation = useMutation({
     mutationFn: async ({ id, data }: { id: string; data: typeof rewardData }) => {
-      const response = await axios.put(API_ENDPOINTS.rewards.update(id, {}), data);
+      const response = await axiosInstance.put(API_ENDPOINTS.stores.rewards.update(id, {}, false), data);
       return response.data;
     },
     onSuccess: () => {
@@ -110,7 +118,7 @@ export default function RewardsPage() {
   // حذف مكافأة
   const deleteRewardMutation = useMutation({
     mutationFn: async (id: string) => {
-      const response = await axios.delete(API_ENDPOINTS.rewards.delete(id, {}));
+      const response = await axiosInstance.delete(API_ENDPOINTS.stores.rewards.delete(id, {}, false));
       return response.data;
     },
     onSuccess: () => {
@@ -170,7 +178,7 @@ export default function RewardsPage() {
   const filteredRewards = rewards?.filter((reward: Reward) => {
     const user = users?.find((u: User) => u.id === reward.userId);
     const searchLower = searchQuery.toLowerCase();
-    
+
     return (
       user?.name.toLowerCase().includes(searchLower) ||
       reward.description?.toLowerCase().includes(searchLower)
@@ -197,7 +205,7 @@ export default function RewardsPage() {
     });
   };
 
-  if (isLoading) {
+  if (isLoading || isLoadingStores) {
     return (
       <Box>
         <Box sx={{ mb: 4 }}>
@@ -231,7 +239,21 @@ export default function RewardsPage() {
           >
             إضافة مكافأة جديدة
           </Button>
+          <Select
+            value={storeId}
+            onChange={(e: SelectChangeEvent) => {
+              setStoreId(e.target.value);
+              refetch();
+            }}
+          >
+            {stores?.map((store: Store) => (
+              <MenuItem key={store.id} value={store.id}>
+                {store.name}
+              </MenuItem>
+            ))}
+          </Select>
         </Box>
+
 
         {/* الإحصائيات */}
         <Grid container spacing={3} mb={4}>
@@ -433,6 +455,6 @@ export default function RewardsPage() {
           </DialogActions>
         </Dialog>
       </Box>
-    </PermissionGuard>
+    </PermissionGuard >
   );
 } 

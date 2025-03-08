@@ -57,7 +57,7 @@ import { PDFDocument } from '@/components/shared/pdf-document';
 import { PermissionGuard } from '@/components/common/PermissionGuard';
 import { ActionButton } from '@/components/common/ActionButton';
 import { formatDate, formatNumber } from '@/lib/utils';
-
+let daysOfWeek = ['السبت', 'الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة'];
 export default function StoresPage() {
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
@@ -67,14 +67,15 @@ export default function StoresPage() {
   const [storeData, setStoreData] = useState<Partial<Store>>({
     name: '',
     description: '',
-    userId: '',
     categoryId: '',
+    userId: '',
     address: '',
     phone: '',
     email: '',
-    openingHours: '',
-    closingHours: '',
-    imageUrl: '',
+    workingHours: [],
+    logo: '',
+    coverImage: '',
+    images: [],
     status: 'active',
   });
   const [openPrintDialog, setOpenPrintDialog] = useState(false);
@@ -152,7 +153,7 @@ export default function StoresPage() {
     totalStores: filteredStores?.length || 0,
     activeStores: filteredStores?.filter(s => s.status === 'active').length || 0,
     totalOrders: filteredStores?.reduce((sum, store) => sum + (store.orders?.length || 0), 0) || 0,
-    totalRevenue: filteredStores?.reduce((sum, store) => 
+    totalRevenue: filteredStores?.reduce((sum, store) =>
       sum + (store.orders?.reduce((orderSum, order) => orderSum + (order.price || 0), 0) || 0), 0) || 0,
   };
 
@@ -191,9 +192,10 @@ export default function StoresPage() {
         address: store.address,
         phone: store.phone,
         email: store.email,
-        openingHours: store.openingHours,
-        closingHours: store.closingHours,
-        imageUrl: store.imageUrl,
+        workingHours: store.workingHours,
+        logo: store.logo,
+        coverImage: store.coverImage,
+        images: store.images,
         status: store.status,
       });
     } else {
@@ -206,9 +208,10 @@ export default function StoresPage() {
         address: '',
         phone: '',
         email: '',
-        openingHours: '',
-        closingHours: '',
-        imageUrl: '',
+        workingHours: [],
+        logo: '',
+        coverImage: '',
+        images: [],
         status: 'active',
       });
     }
@@ -226,9 +229,10 @@ export default function StoresPage() {
       address: '',
       phone: '',
       email: '',
-      openingHours: '',
-      closingHours: '',
-      imageUrl: '',
+      workingHours: [],
+      logo: '',
+      coverImage: '',
+      images: [],
       status: 'active',
     });
   };
@@ -389,7 +393,7 @@ export default function StoresPage() {
                     <TableRow key={store.id}>
                       <TableCell>
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                          <Avatar src={store.imageUrl} alt={store.name}>
+                          <Avatar src={store.logo} alt={store.name}>
                             {store.name.charAt(0)}
                           </Avatar>
                           <Box>
@@ -427,7 +431,7 @@ export default function StoresPage() {
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                           <Rating value={store.rating || 0} readOnly size="small" />
                           <Typography variant="body2">
-                            ({store.reviews?.length || 0})
+                            ({store.reviewsCount || 0})
                           </Typography>
                         </Box>
                       </TableCell>
@@ -442,7 +446,7 @@ export default function StoresPage() {
                           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                             <IconClock size={16} />
                             <Typography variant="body2">
-                              {store.openingHours} - {store.closingHours}
+                              {store.workingHours.map(wh => `${wh.dayOfWeek} ${wh.openTime} - ${wh.closeTime}`).join(', ')}
                             </Typography>
                           </Box>
                         </Stack>
@@ -581,22 +585,25 @@ export default function StoresPage() {
                     </Select>
                   </FormControl>
                 </Grid>
-                <Grid item xs={12} md={6}>
-                  <TextField
-                    fullWidth
-                    label="وقت الفتح"
-                    value={storeData.openingHours}
-                    onChange={(e) => setStoreData({ ...storeData, openingHours: e.target.value })}
-                  />
-                </Grid>
-                <Grid item xs={12} md={6}>
-                  <TextField
-                    fullWidth
-                    label="وقت الإغلاق"
-                    value={storeData.closingHours}
-                    onChange={(e) => setStoreData({ ...storeData, closingHours: e.target.value })}
-                  />
-                </Grid>
+                {Array.from({ length: 7 }).map((_, index) => (
+                  <>
+                    <Grid item xs={12} md={6} key={index}>
+                      <TextField
+                        fullWidth
+                        label={`وقت الفتح ${daysOfWeek[index]}`}
+                        value={storeData.workingHours?.[index]?.openTime || ""}
+                        onChange={(e) => setStoreData((prev) => ({ ...prev, workingHours: prev.workingHours?.map((wh, i) => i === index ? { ...wh, openTime: e.target.value } : wh) || [] }))}
+                      />
+                    </Grid>
+                    <Grid item xs={12} md={6}>
+                      <TextField
+                        fullWidth
+                        label="وقت الإغلاق"
+                        value={storeData.workingHours?.[index]?.closeTime || ""}
+                        onChange={(e) => setStoreData((prev) => ({ ...prev, workingHours: prev.workingHours?.map((wh, i) => i === index ? { ...wh, closeTime: e.target.value } : wh) || [] }))}
+                      />
+
+                    </Grid></>))}
                 <Grid item xs={12} md={6}>
                   <FormControl fullWidth>
                     <InputLabel>الحالة</InputLabel>
@@ -615,8 +622,8 @@ export default function StoresPage() {
                     شعار المتجر
                   </Typography>
                   <ImageUpload
-                    value={storeData.imageUrl}
-                    onChange={(url) => setStoreData({ ...storeData, imageUrl: url })}
+                    value={storeData.logo}
+                    onChange={(url) => setStoreData({ ...storeData, logo: url })}
                   />
                 </Grid>
               </Grid>
@@ -657,14 +664,14 @@ export default function StoresPage() {
                       العنوان: ${selectedStore.address}
                       رقم الهاتف: ${selectedStore.phone}
                       البريد الإلكتروني: ${selectedStore.email}
-                      أوقات العمل: ${selectedStore.openingHours} - ${selectedStore.closingHours}
+                      أوقات العمل: ${selectedStore.workingHours.map(wh => `${daysOfWeek[wh.dayOfWeek]} ${wh.openTime} - ${wh.closeTime}`).join(', ')}
                     `
                   },
                   {
                     title: 'إحصائيات النشاط',
                     content: `
                       عدد الطلبات: ${selectedStore.orders?.length || 0}
-                      التقييم: ${selectedStore.rating || 0} (${selectedStore.reviews?.length || 0} تقييم)
+                      التقييم: ${selectedStore.rating || 0} (${selectedStore.reviewsCount || 0} تقييم)
                       الحالة: ${selectedStore.status === 'active' ? 'نشط' : 'غير نشط'}
                     `
                   }
