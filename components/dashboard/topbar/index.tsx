@@ -1,100 +1,90 @@
 'use client';
 
 import {
-  AppBar,
-  Avatar,
   Box,
   IconButton,
-  Menu,
-  MenuItem,
+  Stack,
+  AppBar,
   Toolbar,
-  Typography,
-} from "@mui/material";
-import { IconMenu2 } from "@tabler/icons-react";
-import { signOut, useSession } from "next-auth/react";
-import { useState } from "react";
+  useTheme,
+  useMediaQuery,
+} from '@mui/material';
+import { IconMenu2, IconBell, IconUser } from '@tabler/icons-react';
+import { useSession } from 'next-auth/react';
+import { NotificationsPopover } from '@/components/dashboard/notifications/notifications-popover';
+import { ProfilePopover } from '@/components/common/profile-popover';
+import { useState } from 'react';
 
 interface TopbarProps {
-  onDrawerToggle: () => void;
+  onToggleSidebar: () => void;
 }
 
-export function Topbar({ onDrawerToggle }: TopbarProps) {
+export function Topbar({ onToggleSidebar }: TopbarProps) {
   const { data: session } = useSession();
-  const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  const [notificationsAnchor, setNotificationsAnchor] = useState<null | HTMLElement>(null);
+  const [profileAnchor, setProfileAnchor] = useState<null | HTMLElement>(null);
 
-  const handleMenu = (event: React.MouseEvent<HTMLElement>) => {
-    setAnchorEl(event.currentTarget);
+  const handleOpenNotifications = (event: React.MouseEvent<HTMLElement>) => {
+    setNotificationsAnchor(event.currentTarget);
   };
 
-  const handleClose = () => {
-    setAnchorEl(null);
+  const handleCloseNotifications = () => {
+    setNotificationsAnchor(null);
   };
 
-  const handleLogout = () => {
-    signOut();
-    handleClose();
+  const handleOpenProfile = (event: React.MouseEvent<HTMLElement>) => {
+    setProfileAnchor(event.currentTarget);
+  };
+
+  const handleCloseProfile = () => {
+    setProfileAnchor(null);
   };
 
   return (
     <AppBar
-      position="sticky"
-      color="inherit"
-      elevation={1}
+      position="fixed"
       sx={{
-        zIndex: (theme) => theme.zIndex.drawer + 1,
+        backgroundColor: 'background.paper',
+        color: 'text.primary',
+        boxShadow: 1,
       }}
     >
       <Toolbar>
-        <IconButton
-          color="inherit"
-          aria-label="open drawer"
-          edge="start"
-          onClick={onDrawerToggle}
-          sx={{ ml: 2, display: { md: "none" } }}
-        >
-          <IconMenu2 />
-        </IconButton>
-
-        <Box sx={{ flexGrow: 1 }} />
-
-        <Box sx={{ display: "flex", alignItems: "center", gap: 2 }}>
-          <Typography variant="subtitle1">
-            {session?.user?.name || "مستخدم"}
-          </Typography>
+        {isMobile && (
           <IconButton
-            size="large"
-            aria-label="account of current user"
-            aria-controls="menu-appbar"
-            aria-haspopup="true"
-            onClick={handleMenu}
-            color="inherit"
+            onClick={onToggleSidebar}
+            sx={{
+              ml: { xs: 0, md: 2 },
+              display: { xs: 'inline-flex', md: 'none' },
+            }}
           >
-            <Avatar
-              alt={session?.user?.name || "مستخدم"}
-              src={session?.user?.imageUrl || "https://res.cloudinary.com/dixa9yvlz/image/upload/v1741264530/Manfaz/default-profile.jpg"}
-              sx={{ width: 32, height: 32 }}
-            />
+            <IconMenu2 />
           </IconButton>
-          <Menu
-            id="menu-appbar"
-            anchorEl={anchorEl}
-            anchorOrigin={{
-              vertical: "bottom",
-              horizontal: "left",
-            }}
-            keepMounted
-            transformOrigin={{
-              vertical: "top",
-              horizontal: "left",
-            }}
-            open={Boolean(anchorEl)}
-            onClose={handleClose}
-          >
-            <MenuItem onClick={handleClose}>الملف الشخصي</MenuItem>
-            <MenuItem onClick={handleClose}>الإعدادات</MenuItem>
-            <MenuItem onClick={handleLogout}>تسجيل الخروج</MenuItem>
-          </Menu>
-        </Box>
+        )}
+        <Box sx={{ flexGrow: 1 }} />
+        <Stack direction="row" spacing={1} alignItems="center">
+          <IconButton onClick={handleOpenNotifications}>
+            <IconBell />
+          </IconButton>
+          <IconButton onClick={handleOpenProfile}>
+            <IconUser />
+          </IconButton>
+        </Stack>
+
+        <NotificationsPopover
+          open={Boolean(notificationsAnchor)}
+          anchorEl={notificationsAnchor}
+          onClose={handleCloseNotifications}
+        />
+
+        <ProfilePopover
+          open={Boolean(profileAnchor)}
+          anchorEl={profileAnchor}
+          onClose={handleCloseProfile}
+          user={session?.user}
+        />
       </Toolbar>
     </AppBar>
   );

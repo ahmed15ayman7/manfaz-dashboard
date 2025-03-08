@@ -1,25 +1,38 @@
 'use client';
 
-import { Topbar } from '@/components/dashboard/topbar';
+import { Box } from '@mui/material';
 import { Sidebar } from '@/components/dashboard/sidebar';
-import { Providers } from '@/components/providers';
+import { Topbar } from '@/components/dashboard/topbar';
+import { useState } from 'react';
 
-export default function DashboardLayout({
-  children,
-}: {
+interface DashboardLayoutProps {
   children: React.ReactNode;
-}) {
+}
+
+export default function DashboardLayout({ children }: DashboardLayoutProps) {
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+
+  const handleToggleSidebar = () => {
+    setIsSidebarOpen(!isSidebarOpen);
+  };
+
   return (
-    <Providers>
-      <div className="flex h-screen overflow-hidden w-[100vw]">
-        <Sidebar />
-        <div className="flex flex-1 flex-col overflow-hidden w-[calc(100%-280px)] mr-[280px]">
-          <Topbar onDrawerToggle={() => { }} />
-          <main className="flex-1 overflow-y-auto bg-background p-4">
-            {children}
-          </main>
-        </div>
-      </div>
-    </Providers>
+    <Box sx={{ display: 'flex', minHeight: '100vh' }}>
+      <Sidebar isOpen={isSidebarOpen} onClose={() => setIsSidebarOpen(false)} />
+      <Box sx={{ flexGrow: 1 }}>
+        <Topbar onToggleSidebar={handleToggleSidebar} />
+        <Box
+          component="main"
+          sx={{
+            p: 3,
+            pt: 10,
+            maxWidth: '100vw',
+            overflowX: 'hidden',
+          }}
+        >
+          {children}
+        </Box>
+      </Box>
+    </Box>
   );
 } 
