@@ -494,11 +494,6 @@ export interface EmployeePermissions {
     viewAuditLogs: boolean;
     manageBackups: boolean;
 
-    // إدارة المواقع
-    viewLocations: boolean;
-    createLocations: boolean;
-    updateLocations: boolean;
-    deleteLocations: boolean;
 }
 
 // واجهة نشاط الموظف
