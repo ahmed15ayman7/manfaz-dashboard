@@ -122,6 +122,8 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
     return item.permissions.some(permission => permissions[permission]);
   });
 
+  const sidebarWidth = 280;
+
   const sidebarContent = (
     <Box 
       sx={{ 
@@ -224,7 +226,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
         variant="temporary"
         PaperProps={{
           sx: {
-            width: 280,
+            width: sidebarWidth,
             border: 'none',
             boxShadow: (theme) => `0 0 24px ${alpha(theme.palette.primary.main, 0.1)}`,
             backdropFilter: 'blur(8px)',
@@ -238,23 +240,37 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
   }
 
   return (
-    <Paper
-      elevation={0}
-      sx={{
-        height: '100%',
-        width: 280,
-        zIndex: 1000,
-        position: 'fixed',
-        right: 0,
-        borderLeft: '1px solid',
-        borderColor: 'divider',
-        display: { xs: 'none', md: 'block' },
-        backdropFilter: 'blur(8px)',
-        backgroundColor: (theme) => alpha(theme.palette.background.paper, 0.9),
-        boxShadow: (theme) => `0 0 24px ${alpha(theme.palette.primary.main, 0.1)}`,
-      }}
-    >
-      {sidebarContent}
-    </Paper>
+    <>
+      <Paper
+        elevation={0}
+        sx={{
+          height: '100vh',
+          width: sidebarWidth,
+          position: 'fixed',
+          top: 0,
+          right: 0,
+          borderLeft: '1px solid',
+          borderColor: 'divider',
+          display: { xs: 'none', md: 'block' },
+          backdropFilter: 'blur(8px)',
+          backgroundColor: (theme) => alpha(theme.palette.background.paper, 0.9),
+          boxShadow: (theme) => `0 0 24px ${alpha(theme.palette.primary.main, 0.1)}`,
+          zIndex: (theme) => theme.zIndex.drawer,
+        }}
+      >
+        {sidebarContent}
+      </Paper>
+      <Box
+        component="main"
+        sx={{
+          minHeight: '100vh',
+          marginRight: { xs: 0, md: `${sidebarWidth}px` },
+          transition: 'margin 0.3s ease-in-out',
+          width: { xs: '100%', md: `calc(100% - ${sidebarWidth}px)` },
+        }}
+      >
+        {/* هنا يتم وضع محتوى الصفحة */}
+      </Box>
+    </>
   );
 } 
