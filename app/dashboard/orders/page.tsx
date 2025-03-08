@@ -27,14 +27,74 @@ import {
   Avatar,
   Chip,
   InputAdornment,
+  Skeleton,
 } from '@mui/material';
-import { IconPlus, IconEdit, IconTrash, IconSearch, IconTruck, IconCash, IconChartBar, IconPrinter } from '@tabler/icons-react';
+import { IconPlus, IconEdit, IconTrash, IconSearch, IconTruck, IconCash, IconChartBar, IconPrinter, IconEye } from '@tabler/icons-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import axios from 'axios';
 import API_ENDPOINTS from '@/lib/apis';
 import { Order, User, Service, Worker, DeliveryDriver, UserLocation } from '@/interfaces';
 import { ExcelExport } from '@/components/shared/excel-export';
 import { PDFDocument, PrintButton } from '@/components/shared/pdf-document';
+import { PermissionGuard } from '@/components/common/PermissionGuard';
+import { ActionButton } from '@/components/common/ActionButton';
+import { formatNumber } from '@/lib/utils';
+
+const getStatusColor = (status: Order['status']) => {
+  switch (status) {
+    case 'pending':
+      return 'warning';
+    case 'in_progress':
+      return 'info';
+    case 'completed':
+      return 'success';
+    case 'canceled':
+      return 'error';
+    default:
+      return 'default';
+  }
+};
+
+const getStatusLabel = (status: Order['status']) => {
+  switch (status) {
+    case 'pending':
+      return 'قيد الانتظار';
+    case 'in_progress':
+      return 'قيد التنفيذ';
+    case 'completed':
+      return 'مكتمل';
+    case 'canceled':
+      return 'ملغي';
+    default:
+      return 'غير معروف';
+  }
+};
+
+const getPaymentStatusColor = (status: Order['paymentStatus']) => {
+  switch (status) {
+    case 'pending':
+      return 'warning';
+    case 'paid':
+      return 'success';
+    case 'failed':
+      return 'error';
+    default:
+      return 'default';
+  }
+};
+
+const getPaymentStatusLabel = (status: Order['paymentStatus']) => {
+  switch (status) {
+    case 'pending':
+      return 'قيد الانتظار';
+    case 'paid':
+      return 'مدفوع';
+    case 'failed':
+      return 'فشل الدفع';
+    default:
+      return 'غير معروف';
+  }
+};
 
 export default function OrdersPage() {
   const [page, setPage] = useState(0);
@@ -93,7 +153,7 @@ export default function OrdersPage() {
     },
   });
 
-  const { data: orders } = useQuery<Order[]>({
+  const { data: orders, isLoading } = useQuery<Order[]>({
     queryKey: ['orders'],
     queryFn: async () => {
       const response = await axios.get(API_ENDPOINTS.orders.getAll({}));
@@ -279,391 +339,404 @@ export default function OrdersPage() {
     grandTotal: selectedOrder.price ? selectedOrder.price * 1.15 : 0,
   } : null;
 
+  if (isLoading) {
+    return (
+      <Box>
+        <Box sx={{ mb: 4, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <Skeleton variant="text" width={200} height={40} />
+          <Skeleton variant="rectangular" width={120} height={36} />
+        </Box>
+        <TableContainer component={Paper}>
+          <Table>
+            <TableHead>
+              <TableRow>
+                {[
+                  'رقم الطلب',
+                  'العميل',
+                  'الخدمة',
+                  'السعر',
+                  'حالة الطلب',
+                  'حالة الدفع',
+                  'الإجراءات',
+                ].map((header) => (
+                  <TableCell key={header}>
+                    <Skeleton variant="text" />
+                  </TableCell>
+                ))}
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {[...Array(5)].map((_, index) => (
+                <TableRow key={index}>
+                  {[...Array(7)].map((_, cellIndex) => (
+                    <TableCell key={cellIndex}>
+                      <Skeleton variant="text" />
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      </Box>
+    );
+  }
+
   return (
-    <Box>
-      <Box sx={{ mb: 4, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <Typography variant="h5" fontWeight="bold">
-          إدارة الطلبات
-        </Typography>
-        <Button
-          variant="contained"
-          startIcon={<IconPlus />}
-          onClick={() => handleOpenDialog()}
-          sx={{ backgroundColor: 'primary.main' }}
-        >
-          إضافة طلب جديد
-        </Button>
-      </Box>
-
-      {/* الإحصائيات */}
-      <Grid container spacing={3} mb={4}>
-        <Grid item xs={12} md={3}>
-          <Paper sx={{ p: 3, display: 'flex', alignItems: 'center', gap: 2 }}>
-            <IconTruck size={24} color="#0068FF" />
-            <Box>
-              <Typography variant="h6">{stats.totalOrders}</Typography>
-              <Typography variant="body2" color="text.secondary">
-                إجمالي الطلبات
-              </Typography>
-            </Box>
-          </Paper>
-        </Grid>
-        <Grid item xs={12} md={3}>
-          <Paper sx={{ p: 3, display: 'flex', alignItems: 'center', gap: 2 }}>
-            <IconChartBar size={24} color="#4CAF50" />
-            <Box>
-              <Typography variant="h6">{stats.pendingOrders}</Typography>
-              <Typography variant="body2" color="text.secondary">
-                الطلبات المعلقة
-              </Typography>
-            </Box>
-          </Paper>
-        </Grid>
-        <Grid item xs={12} md={3}>
-          <Paper sx={{ p: 3, display: 'flex', alignItems: 'center', gap: 2 }}>
-            <IconTruck size={24} color="#FF9800" />
-            <Box>
-              <Typography variant="h6">{stats.completedOrders}</Typography>
-              <Typography variant="body2" color="text.secondary">
-                الطلبات المكتملة
-              </Typography>
-            </Box>
-          </Paper>
-        </Grid>
-        <Grid item xs={12} md={3}>
-          <Paper sx={{ p: 3, display: 'flex', alignItems: 'center', gap: 2 }}>
-            <IconCash size={24} color="#F44336" />
-            <Box>
-              <Typography variant="h6">{stats.totalRevenue}</Typography>
-              <Typography variant="body2" color="text.secondary">
-                إجمالي الإيرادات
-              </Typography>
-            </Box>
-          </Paper>
-        </Grid>
-      </Grid>
-
-      {/* قسم البحث */}
-      <Paper sx={{ p: 2, mb: 3 }}>
-        <Grid container spacing={2} alignItems="center">
-          <Grid item xs={12} md={6}>
-            <TextField
-              fullWidth
-              placeholder="البحث عن طلب..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              InputProps={{
-                startAdornment: <IconSearch size={20} />,
-              }}
-            />
-          </Grid>
-        </Grid>
-      </Paper>
-
-      {/* أزرار التصدير والطباعة */}
-      <Box sx={{ mb: 2, display: 'flex', gap: 2, justifyContent: 'flex-end' }}>
-        <ExcelExport
-          data={excelData}
-          columns={excelColumns}
-          filename="orders.xlsx"
-          sheetName="الطلبات"
-        />
-      </Box>
-
-      {/* جدول الطلبات */}
-      <TableContainer component={Paper}>
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell>العميل</TableCell>
-              <TableCell>الخدمة</TableCell>
-              <TableCell>مقدم الخدمة</TableCell>
-              <TableCell>السعر</TableCell>
-              <TableCell>الحالة</TableCell>
-              <TableCell>حالة الدفع</TableCell>
-              <TableCell>التاريخ</TableCell>
-              <TableCell>الإجراءات</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
-            {filteredOrders
-              ?.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-              .map((order) => {
-                const user = users?.find(u => u.id === order.userId);
-                const service = services?.find(s => s.id === order.serviceId);
-                const provider = workers?.find(w => w.id === order.providerId);
-                return (
-                  <TableRow key={order.id}>
-                    <TableCell>
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                        <Avatar src={user?.imageUrl}>
-                          {user?.name?.[0]}
-                        </Avatar>
-                        <Box>
-                          <Typography variant="subtitle2">{user?.name}</Typography>
-                          <Typography variant="caption" color="text.secondary">
-                            {user?.email}
-                          </Typography>
-                        </Box>
-                      </Box>
-                    </TableCell>
-                    <TableCell>{service?.name}</TableCell>
-                    <TableCell>
-                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                        <Avatar src={provider?.user?.imageUrl}>
-                          {provider?.user?.name?.[0]}
-                        </Avatar>
-                        <Typography variant="subtitle2">{provider?.user?.name}</Typography>
-                      </Box>
-                    </TableCell>
-                    <TableCell>
-                      <Typography variant="body2">
-                        {order.price} ريال
-                      </Typography>
-                    </TableCell>
-                    <TableCell>
-                      <Chip
-                        label={
-                          order.status === 'completed'
-                            ? 'مكتمل'
-                            : order.status === 'pending'
-                              ? 'معلق'
-                              : order.status === 'in_progress'
-                                ? 'قيد التنفيذ'
-                                : 'ملغي'
-                        }
-                        color={
-                          order.status === 'completed'
-                            ? 'success'
-                            : order.status === 'pending'
-                              ? 'warning'
-                              : order.status === 'in_progress'
-                                ? 'info'
-                                : 'error'
-                        }
-                        size="small"
-                      />
-                    </TableCell>
-                    <TableCell>
-                      <Chip
-                        label={
-                          order.paymentStatus === 'paid'
-                            ? 'مدفوع'
-                            : order.paymentStatus === 'pending'
-                              ? 'معلق'
-                              : 'فشل'
-                        }
-                        color={
-                          order.paymentStatus === 'paid'
-                            ? 'success'
-                            : order.paymentStatus === 'pending'
-                              ? 'warning'
-                              : 'error'
-                        }
-                        size="small"
-                      />
-                    </TableCell>
-                    <TableCell>{formatDate(order.createdAt!)}</TableCell>
-                    <TableCell>
-                      <IconButton
-                        color="primary"
-                        size="small"
-                        onClick={() => handleOpenDialog(order)}
-                      >
-                        <IconEdit size={18} />
-                      </IconButton>
-                      <IconButton
-                        color="error"
-                        size="small"
-                        onClick={() => deleteOrderMutation.mutate(order.id!)}
-                      >
-                        <IconTrash size={18} />
-                      </IconButton>
-                      <IconButton
-                        color="info"
-                        size="small"
-                        onClick={() => handlePrintInvoice(order)}
-                      >
-                        <IconPrinter size={18} />
-                      </IconButton>
-                    </TableCell>
-                  </TableRow>
-                );
-              })}
-          </TableBody>
-        </Table>
-        <TablePagination
-          component="div"
-          count={filteredOrders?.length || 0}
-          page={page}
-          onPageChange={handleChangePage}
-          rowsPerPage={rowsPerPage}
-          onRowsPerPageChange={handleChangeRowsPerPage}
-          labelRowsPerPage="عدد العناصر في الصفحة"
-          labelDisplayedRows={({ from, to, count }) =>
-            `${from}-${to} من ${count !== -1 ? count : `أكثر من ${to}`}`
-          }
-        />
-      </TableContainer>
-
-      {/* نافذة عرض وطباعة الفاتورة */}
-      <Dialog
-        open={openPrintDialog}
-        onClose={() => setOpenPrintDialog(false)}
-        maxWidth="md"
-        fullWidth
-      >
-        {selectedOrder && invoiceData && (
-          <PDFDocument
-            title="فاتورة طلب"
-            data={invoiceData}
-            template="invoice"
-            companyInfo={{
-              name: 'منفذ',
-              address: 'المملكة العربية السعودية',
-              phone: '+966 123456789',
-              email: 'info@manfath.com',
-              logo: '/images/logo.png',
-            }}
-          />
-        )}
-      </Dialog>
-
-      {/* نموذج إضافة/تحديث طلب */}
-      <Dialog open={openDialog} onClose={handleCloseDialog} maxWidth="sm" fullWidth>
-        <DialogTitle>
-          {editingOrder ? 'تحديث الطلب' : 'إضافة طلب جديد'}
-        </DialogTitle>
-        <DialogContent>
-          <Box sx={{ pt: 2, display: 'flex', flexDirection: 'column', gap: 2 }}>
-            <FormControl fullWidth>
-              <InputLabel>العميل</InputLabel>
-              <Select
-                value={orderData.userId}
-                label="العميل"
-                onChange={(e) => setOrderData({ ...orderData, userId: e.target.value })}
-              >
-                {users?.map((user) => (
-                  <MenuItem key={user.id} value={user.id}>
-                    {user.name}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-            <FormControl fullWidth>
-              <InputLabel>الخدمة</InputLabel>
-              <Select
-                value={orderData.serviceId}
-                label="الخدمة"
-                onChange={(e) => setOrderData({ ...orderData, serviceId: e.target.value })}
-              >
-                {services?.map((service) => (
-                  <MenuItem key={service.id} value={service.id}>
-                    {service.name}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-            <FormControl fullWidth>
-              <InputLabel>مقدم الخدمة</InputLabel>
-              <Select
-                value={orderData.providerId}
-                label="مقدم الخدمة"
-                onChange={(e) => setOrderData({ ...orderData, providerId: e.target.value })}
-              >
-                {workers?.map((worker) => (
-                  <MenuItem key={worker.id} value={worker.id}>
-                    {worker.user?.name}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-            <FormControl fullWidth>
-              <InputLabel>السائق</InputLabel>
-              <Select
-                value={orderData.deliveryDriverId}
-                label="السائق"
-                onChange={(e) => setOrderData({ ...orderData, deliveryDriverId: e.target.value })}
-              >
-                <MenuItem value="">بدون سائق</MenuItem>
-                {drivers?.map((driver) => (
-                  <MenuItem key={driver.id} value={driver.id}>
-                    {driver.user?.name}
-                  </MenuItem>
-                ))}
-              </Select>
-            </FormControl>
-            <TextField
-              fullWidth
-              label="الوصف"
-              multiline
-              rows={3}
-              value={orderData.description}
-              onChange={(e) => setOrderData({ ...orderData, description: e.target.value })}
-            />
-            <TextField
-              fullWidth
-              label="ملاحظات"
-              multiline
-              rows={2}
-              value={orderData.notes}
-              onChange={(e) => setOrderData({ ...orderData, notes: e.target.value })}
-            />
-            <TextField
-              fullWidth
-              label="السعر"
-              type="number"
-              value={orderData.price}
-              onChange={(e) => setOrderData({ ...orderData, price: parseFloat(e.target.value) })}
-              InputProps={{
-                endAdornment: <InputAdornment position="end">ريال</InputAdornment>,
-              }}
-            />
-            <TextField
-              fullWidth
-              label="المدة (بالدقائق)"
-              type="number"
-              value={orderData.duration}
-              onChange={(e) => setOrderData({ ...orderData, duration: parseInt(e.target.value) })}
-            />
-            <FormControl fullWidth>
-              <InputLabel>حالة الطلب</InputLabel>
-              <Select
-                value={orderData.status}
-                label="حالة الطلب"
-                onChange={(e) => setOrderData({ ...orderData, status: e.target.value as Order['status'] })}
-              >
-                <MenuItem value="pending">معلق</MenuItem>
-                <MenuItem value="in_progress">قيد التنفيذ</MenuItem>
-                <MenuItem value="completed">مكتمل</MenuItem>
-                <MenuItem value="canceled">ملغي</MenuItem>
-              </Select>
-            </FormControl>
-            <FormControl fullWidth>
-              <InputLabel>حالة الدفع</InputLabel>
-              <Select
-                value={orderData.paymentStatus}
-                label="حالة الدفع"
-                onChange={(e) => setOrderData({ ...orderData, paymentStatus: e.target.value as Order['paymentStatus'] })}
-              >
-                <MenuItem value="pending">معلق</MenuItem>
-                <MenuItem value="paid">مدفوع</MenuItem>
-                <MenuItem value="failed">فشل</MenuItem>
-              </Select>
-            </FormControl>
-          </Box>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={handleCloseDialog}>إلغاء</Button>
+    <PermissionGuard requiredPermissions={['viewOrders']}>
+      <Box>
+        <Box sx={{ mb: 4, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <Typography variant="h5" fontWeight="bold">
+            الطلبات
+          </Typography>
           <Button
             variant="contained"
-            onClick={handleSubmit}
-            disabled={!orderData.userId || !orderData.serviceId || !orderData.providerId}
+            startIcon={<IconPlus />}
+            onClick={() => handleOpenDialog()}
+            sx={{ backgroundColor: 'primary.main' }}
           >
-            {editingOrder ? 'تحديث' : 'إضافة'}
+            إضافة طلب جديد
           </Button>
-        </DialogActions>
-      </Dialog>
-    </Box>
+        </Box>
+
+        {/* الإحصائيات */}
+        <Grid container spacing={3} mb={4}>
+          <Grid item xs={12} md={3}>
+            <Paper sx={{ p: 3, display: 'flex', alignItems: 'center', gap: 2 }}>
+              <IconTruck size={24} color="#0068FF" />
+              <Box>
+                <Typography variant="h6">{stats.totalOrders}</Typography>
+                <Typography variant="body2" color="text.secondary">
+                  إجمالي الطلبات
+                </Typography>
+              </Box>
+            </Paper>
+          </Grid>
+          <Grid item xs={12} md={3}>
+            <Paper sx={{ p: 3, display: 'flex', alignItems: 'center', gap: 2 }}>
+              <IconChartBar size={24} color="#4CAF50" />
+              <Box>
+                <Typography variant="h6">{stats.pendingOrders}</Typography>
+                <Typography variant="body2" color="text.secondary">
+                  الطلبات المعلقة
+                </Typography>
+              </Box>
+            </Paper>
+          </Grid>
+          <Grid item xs={12} md={3}>
+            <Paper sx={{ p: 3, display: 'flex', alignItems: 'center', gap: 2 }}>
+              <IconTruck size={24} color="#FF9800" />
+              <Box>
+                <Typography variant="h6">{stats.completedOrders}</Typography>
+                <Typography variant="body2" color="text.secondary">
+                  الطلبات المكتملة
+                </Typography>
+              </Box>
+            </Paper>
+          </Grid>
+          <Grid item xs={12} md={3}>
+            <Paper sx={{ p: 3, display: 'flex', alignItems: 'center', gap: 2 }}>
+              <IconCash size={24} color="#F44336" />
+              <Box>
+                <Typography variant="h6">{stats.totalRevenue}</Typography>
+                <Typography variant="body2" color="text.secondary">
+                  إجمالي الإيرادات
+                </Typography>
+              </Box>
+            </Paper>
+          </Grid>
+        </Grid>
+
+        {/* قسم البحث */}
+        <Paper sx={{ p: 2, mb: 3 }}>
+          <Grid container spacing={2} alignItems="center">
+            <Grid item xs={12} md={6}>
+              <TextField
+                fullWidth
+                placeholder="البحث عن طلب..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                InputProps={{
+                  startAdornment: <IconSearch size={20} />,
+                }}
+              />
+            </Grid>
+          </Grid>
+        </Paper>
+
+        {/* أزرار التصدير والطباعة */}
+        <Box sx={{ mb: 2, display: 'flex', gap: 2, justifyContent: 'flex-end' }}>
+          <ExcelExport
+            data={excelData}
+            columns={excelColumns}
+            filename="orders.xlsx"
+            sheetName="الطلبات"
+          />
+        </Box>
+
+        {/* جدول الطلبات */}
+        <TableContainer component={Paper}>
+          <Table>
+            <TableHead>
+              <TableRow>
+                <TableCell>رقم الطلب</TableCell>
+                <TableCell>العميل</TableCell>
+                <TableCell>الخدمة</TableCell>
+                <TableCell>السعر</TableCell>
+                <TableCell>حالة الطلب</TableCell>
+                <TableCell>حالة الدفع</TableCell>
+                <TableCell>الإجراءات</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {(filteredOrders || [])
+                .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                .map((order) => {
+                  const user = users?.find(u => u.id === order.userId);
+                  const service = services?.find(s => s.id === order.serviceId);
+                  const provider = workers?.find(w => w.id === order.providerId);
+                  return (
+                    <TableRow key={order.id}>
+                      <TableCell>
+                        <Typography fontWeight="medium">#{order.id}</Typography>
+                      </TableCell>
+                      <TableCell>
+                        <Typography>{user?.name}</Typography>
+                        <Typography variant="caption" color="text.secondary">
+                          {user?.phone}
+                        </Typography>
+                      </TableCell>
+                      <TableCell>
+                        <Typography>{service?.name}</Typography>
+                        <Typography variant="caption" color="text.secondary">
+                          {service?.type}
+                        </Typography>
+                      </TableCell>
+                      <TableCell>
+                        <Typography fontWeight="medium">
+                          {formatNumber(order.price || 0, 'currency')}
+                        </Typography>
+                      </TableCell>
+                      <TableCell>
+                        <Chip
+                          label={getStatusLabel(order.status)}
+                          color={getStatusColor(order.status)}
+                          size="small"
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <Chip
+                          label={getPaymentStatusLabel(order.paymentStatus)}
+                          color={getPaymentStatusColor(order.paymentStatus)}
+                          size="small"
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <ActionButton
+                          requiredPermissions={['updateOrders']}
+                          size="small"
+                          color="primary"
+                          onClick={() => handleOpenDialog(order)}
+                        >
+                          <IconEdit size={18} />
+                        </ActionButton>
+                        <ActionButton
+                          requiredPermissions={['deleteOrders']}
+                          size="small"
+                          color="error"
+                          sx={{ mr: 1 }}
+                          onClick={() => deleteOrderMutation.mutate(order.id!)}
+                        >
+                          <IconTrash size={18} />
+                        </ActionButton>
+                        <ActionButton
+                          requiredPermissions={['viewOrders']}
+                          size="small"
+                          color="info"
+                          sx={{ mr: 1 }}
+                          onClick={() => handlePrintInvoice(order)}
+                        >
+                          <IconEye size={18} />
+                        </ActionButton>
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+            </TableBody>
+          </Table>
+          <TablePagination
+            component="div"
+            count={filteredOrders?.length || 0}
+            page={page}
+            onPageChange={handleChangePage}
+            rowsPerPage={rowsPerPage}
+            onRowsPerPageChange={handleChangeRowsPerPage}
+            labelRowsPerPage="عدد العناصر في الصفحة"
+            labelDisplayedRows={({ from, to, count }) =>
+              `${from}-${to} من ${count !== -1 ? count : `أكثر من ${to}`}`
+            }
+          />
+        </TableContainer>
+
+        {/* نافذة عرض وطباعة الفاتورة */}
+        <Dialog
+          open={openPrintDialog}
+          onClose={() => setOpenPrintDialog(false)}
+          maxWidth="md"
+          fullWidth
+        >
+          {selectedOrder && invoiceData && (
+            <PDFDocument
+              title="فاتورة طلب"
+              data={invoiceData}
+              template="invoice"
+              companyInfo={{
+                name: 'منفذ',
+                address: 'المملكة العربية السعودية',
+                phone: '+966 123456789',
+                email: 'info@manfath.com',
+                logo: '/images/logo.png',
+              }}
+            />
+          )}
+        </Dialog>
+
+        {/* نموذج إضافة/تحديث طلب */}
+        <Dialog open={openDialog} onClose={handleCloseDialog} maxWidth="sm" fullWidth>
+          <DialogTitle>
+            {editingOrder ? 'تحديث الطلب' : 'إضافة طلب جديد'}
+          </DialogTitle>
+          <DialogContent>
+            <Box sx={{ pt: 2, display: 'flex', flexDirection: 'column', gap: 2 }}>
+              <FormControl fullWidth>
+                <InputLabel>العميل</InputLabel>
+                <Select
+                  value={orderData.userId}
+                  label="العميل"
+                  onChange={(e) => setOrderData({ ...orderData, userId: e.target.value })}
+                >
+                  {users?.map((user) => (
+                    <MenuItem key={user.id} value={user.id}>
+                      {user.name}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+              <FormControl fullWidth>
+                <InputLabel>الخدمة</InputLabel>
+                <Select
+                  value={orderData.serviceId}
+                  label="الخدمة"
+                  onChange={(e) => setOrderData({ ...orderData, serviceId: e.target.value })}
+                >
+                  {services?.map((service) => (
+                    <MenuItem key={service.id} value={service.id}>
+                      {service.name}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+              <FormControl fullWidth>
+                <InputLabel>مقدم الخدمة</InputLabel>
+                <Select
+                  value={orderData.providerId}
+                  label="مقدم الخدمة"
+                  onChange={(e) => setOrderData({ ...orderData, providerId: e.target.value })}
+                >
+                  {workers?.map((worker) => (
+                    <MenuItem key={worker.id} value={worker.id}>
+                      {worker.user?.name}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+              <FormControl fullWidth>
+                <InputLabel>السائق</InputLabel>
+                <Select
+                  value={orderData.deliveryDriverId}
+                  label="السائق"
+                  onChange={(e) => setOrderData({ ...orderData, deliveryDriverId: e.target.value })}
+                >
+                  <MenuItem value="">بدون سائق</MenuItem>
+                  {drivers?.map((driver) => (
+                    <MenuItem key={driver.id} value={driver.id}>
+                      {driver.user?.name}
+                    </MenuItem>
+                  ))}
+                </Select>
+              </FormControl>
+              <TextField
+                fullWidth
+                label="الوصف"
+                multiline
+                rows={3}
+                value={orderData.description}
+                onChange={(e) => setOrderData({ ...orderData, description: e.target.value })}
+              />
+              <TextField
+                fullWidth
+                label="ملاحظات"
+                multiline
+                rows={2}
+                value={orderData.notes}
+                onChange={(e) => setOrderData({ ...orderData, notes: e.target.value })}
+              />
+              <TextField
+                fullWidth
+                label="السعر"
+                type="number"
+                value={orderData.price}
+                onChange={(e) => setOrderData({ ...orderData, price: parseFloat(e.target.value) })}
+                InputProps={{
+                  endAdornment: <InputAdornment position="end">ريال</InputAdornment>,
+                }}
+              />
+              <TextField
+                fullWidth
+                label="المدة (بالدقائق)"
+                type="number"
+                value={orderData.duration}
+                onChange={(e) => setOrderData({ ...orderData, duration: parseInt(e.target.value) })}
+              />
+              <FormControl fullWidth>
+                <InputLabel>حالة الطلب</InputLabel>
+                <Select
+                  value={orderData.status}
+                  label="حالة الطلب"
+                  onChange={(e) => setOrderData({ ...orderData, status: e.target.value as Order['status'] })}
+                >
+                  <MenuItem value="pending">معلق</MenuItem>
+                  <MenuItem value="in_progress">قيد التنفيذ</MenuItem>
+                  <MenuItem value="completed">مكتمل</MenuItem>
+                  <MenuItem value="canceled">ملغي</MenuItem>
+                </Select>
+              </FormControl>
+              <FormControl fullWidth>
+                <InputLabel>حالة الدفع</InputLabel>
+                <Select
+                  value={orderData.paymentStatus}
+                  label="حالة الدفع"
+                  onChange={(e) => setOrderData({ ...orderData, paymentStatus: e.target.value as Order['paymentStatus'] })}
+                >
+                  <MenuItem value="pending">معلق</MenuItem>
+                  <MenuItem value="paid">مدفوع</MenuItem>
+                  <MenuItem value="failed">فشل</MenuItem>
+                </Select>
+              </FormControl>
+            </Box>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleCloseDialog}>إلغاء</Button>
+            <Button
+              variant="contained"
+              onClick={handleSubmit}
+              disabled={!orderData.userId || !orderData.serviceId || !orderData.providerId}
+            >
+              {editingOrder ? 'تحديث' : 'إضافة'}
+            </Button>
+          </DialogActions>
+        </Dialog>
+      </Box>
+    </PermissionGuard>
   );
 } 

@@ -397,6 +397,7 @@ export interface EmployeePermissions {
 
     // إدارة مقدمي الخدمات
     viewProviders: boolean;
+    createProviders: boolean;
     approveProviders: boolean;
     updateProviders: boolean;
     deleteProviders: boolean;

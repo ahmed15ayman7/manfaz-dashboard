@@ -7,14 +7,13 @@ import {
   FormGroup,
   FormControlLabel,
   Checkbox,
-  Accordion,
-  AccordionSummary,
-  AccordionDetails,
+  Grid,
+  Paper,
   Button,
+  Divider,
   Alert,
 } from '@mui/material';
-import { IconChevronDown } from '@tabler/icons-react';
-import { EmployeePermissions, EmployeeRole } from '@/interfaces';
+import type { EmployeeRole, EmployeePermissions } from '@/interfaces';
 
 interface PermissionsManagerProps {
   role: EmployeeRole;
@@ -22,305 +21,257 @@ interface PermissionsManagerProps {
   onUpdate: (permissions: EmployeePermissions) => void;
 }
 
+const permissionGroups = {
+  orders: {
+    title: 'إدارة الطلبات',
+    permissions: ['viewOrders', 'updateOrders', 'deleteOrders'],
+  },
+  customers: {
+    title: 'إدارة العملاء',
+    permissions: ['viewCustomers', 'updateCustomers'],
+  },
+  services: {
+    title: 'إدارة الخدمات',
+    permissions: ['viewServices', 'createServices', 'updateServices', 'deleteServices'],
+  },
+  offers: {
+    title: 'إدارة العروض والخصومات',
+    permissions: ['viewOffers', 'createOffers', 'updateOffers', 'deleteOffers'],
+  },
+  categories: {
+    title: 'إدارة التصنيفات',
+    permissions: ['viewCategories', 'createCategories', 'updateCategories', 'deleteCategories'],
+  },
+  stores: {
+    title: 'إدارة المتاجر',
+    permissions: ['viewStores', 'createStores', 'updateStores', 'deleteStores'],
+  },
+  providers: {
+    title: 'إدارة مقدمي الخدمات',
+    permissions: ['viewProviders', 'createProviders', 'approveProviders', 'updateProviders', 'deleteProviders'],
+  },
+  wallets: {
+    title: 'إدارة المحافظ والمدفوعات',
+    permissions: ['viewWallets', 'manageTransactions'],
+  },
+  reports: {
+    title: 'إدارة التقارير',
+    permissions: ['viewBasicReports', 'viewAdvancedReports', 'exportReports'],
+  },
+  employees: {
+    title: 'إدارة الموظفين',
+    permissions: ['viewEmployees', 'createEmployees', 'updateEmployees', 'deleteEmployees', 'managePermissions'],
+  },
+  system: {
+    title: 'إدارة النظام',
+    permissions: ['manageSettings', 'viewAuditLogs', 'manageBackups'],
+  },
+};
+
+const permissionLabels: Record<keyof EmployeePermissions, string> = {
+  viewOrders: 'عرض الطلبات',
+  updateOrders: 'تحديث الطلبات',
+  deleteOrders: 'حذف الطلبات',
+  viewCustomers: 'عرض العملاء',
+  updateCustomers: 'تحديث بيانات العملاء',
+  viewServices: 'عرض الخدمات',
+  createServices: 'إضافة خدمات',
+  updateServices: 'تحديث الخدمات',
+  deleteServices: 'حذف الخدمات',
+  viewOffers: 'عرض العروض',
+  createOffers: 'إضافة عروض',
+  updateOffers: 'تحديث العروض',
+  deleteOffers: 'حذف العروض',
+  viewCategories: 'عرض التصنيفات',
+  createCategories: 'إضافة تصنيفات',
+  updateCategories: 'تحديث التصنيفات',
+  deleteCategories: 'حذف التصنيفات',
+  viewStores: 'عرض المتاجر',
+  createStores: 'إضافة متاجر',
+  updateStores: 'تحديث المتاجر',
+  deleteStores: 'حذف المتاجر',
+  viewProviders: 'عرض مقدمي الخدمات',
+  createProviders: 'إضافة مقدمي خدمات',
+  approveProviders: 'اعتماد مقدمي الخدمات',
+  updateProviders: 'تحديث مقدمي الخدمات',
+  deleteProviders: 'حذف مقدمي الخدمات',
+  viewWallets: 'عرض المحافظ',
+  manageTransactions: 'إدارة المعاملات المالية',
+  viewBasicReports: 'عرض التقارير الأساسية',
+  viewAdvancedReports: 'عرض التقارير المتقدمة',
+  exportReports: 'تصدير التقارير',
+  viewEmployees: 'عرض الموظفين',
+  createEmployees: 'إضافة موظفين',
+  updateEmployees: 'تحديث الموظفين',
+  deleteEmployees: 'حذف الموظفين',
+  managePermissions: 'إدارة الصلاحيات',
+  manageSettings: 'إدارة إعدادات النظام',
+  viewAuditLogs: 'عرض سجلات النظام',
+  manageBackups: 'إدارة النسخ الاحتياطية',
+};
+
+const defaultPermissions: Record<EmployeeRole, (keyof EmployeePermissions)[]> = {
+  admin: Object.keys(permissionLabels) as (keyof EmployeePermissions)[],
+  supervisor: [
+    'viewOrders',
+    'updateOrders',
+    'viewCustomers',
+    'updateCustomers',
+    'viewServices',
+    'viewOffers',
+    'viewCategories',
+    'viewStores',
+    'viewProviders',
+    'approveProviders',
+    'viewWallets',
+    'viewBasicReports',
+    'viewAdvancedReports',
+    'exportReports',
+    'viewEmployees',
+    'viewAuditLogs',
+  ],
+  sales: [
+    'viewOrders',
+    'updateOrders',
+    'viewCustomers',
+    'viewServices',
+    'viewOffers',
+    'viewCategories',
+    'viewStores',
+    'viewProviders',
+    'viewBasicReports',
+  ],
+  customer_service: [
+    'viewOrders',
+    'updateOrders',
+    'viewCustomers',
+    'viewServices',
+    'viewOffers',
+    'viewCategories',
+    'viewStores',
+    'viewProviders',
+  ],
+};
+
 export default function PermissionsManager({
   role,
-  permissions,
+  permissions: initialPermissions,
   onUpdate,
 }: PermissionsManagerProps) {
-  const [currentPermissions, setCurrentPermissions] = useState<EmployeePermissions>(permissions);
+  const [permissions, setPermissions] = useState<EmployeePermissions>(initialPermissions);
+  const [hasChanges, setHasChanges] = useState(false);
 
-  // تحديث الصلاحيات عند تغيير الدور
   useEffect(() => {
-    const defaultPermissions = getDefaultPermissionsByRole(role);
-    setCurrentPermissions(defaultPermissions);
-  }, [role]);
-
-  // الحصول على الصلاحيات الافتراضية حسب الدور
-  const getDefaultPermissionsByRole = (role: EmployeeRole): EmployeePermissions => {
-    switch (role) {
-      case 'customer_service':
-        return {
-          // إدارة الطلبات
-          viewOrders: true,
-          updateOrders: true,
-          deleteOrders: false,
-
-          // إدارة العملاء
-          viewCustomers: true,
-          updateCustomers: false,
-
-          // إدارة الخدمات
-          viewServices: true,
-          createServices: false,
-          updateServices: false,
-          deleteServices: false,
-
-          // إدارة العروض والخصومات
-          viewOffers: true,
-          createOffers: false,
-          updateOffers: false,
-          deleteOffers: false,
-
-          // إدارة التصنيفات
-          viewCategories: true,
-          createCategories: false,
-          updateCategories: false,
-          deleteCategories: false,
-
-          // إدارة المتاجر
-          viewStores: true,
-          createStores: false,
-          updateStores: false,
-          deleteStores: false,
-
-          // إدارة مقدمي الخدمات
-          viewProviders: true,
-          approveProviders: false,
-          updateProviders: false,
-          deleteProviders: false,
-
-          // إدارة المحافظ والمدفوعات
-          viewWallets: false,
-          manageTransactions: false,
-
-          // إدارة التقارير
-          viewBasicReports: true,
-          viewAdvancedReports: false,
-          exportReports: false,
-
-          // إدارة الموظفين
-          viewEmployees: false,
-          createEmployees: false,
-          updateEmployees: false,
-          deleteEmployees: false,
-          managePermissions: false,
-
-          // إدارة النظام
-          manageSettings: false,
-          viewAuditLogs: false,
-          manageBackups: false,
-        };
-
-      case 'sales':
-        return {
-          ...getDefaultPermissionsByRole('customer_service'),
-          createServices: true,
-          updateServices: true,
-          createOffers: true,
-          updateOffers: true,
-          viewAdvancedReports: true,
-          exportReports: true,
-        };
-
-      case 'supervisor':
-        return {
-          ...getDefaultPermissionsByRole('sales'),
-          deleteOrders: true,
-          updateCustomers: true,
-          deleteServices: true,
-          deleteOffers: true,
-          createCategories: true,
-          updateCategories: true,
-          deleteCategories: true,
-          createStores: true,
-          updateStores: true,
-          deleteStores: true,
-          approveProviders: true,
-          updateProviders: true,
-          deleteProviders: true,
-          viewWallets: true,
-          manageTransactions: true,
-          viewEmployees: true,
-          createEmployees: true,
-          updateEmployees: true,
-          viewAuditLogs: true,
-        };
-
-      case 'admin':
-        return {
-          viewOrders: true,
-          updateOrders: true,
-          deleteOrders: true,
-          viewCustomers: true,
-          updateCustomers: true,
-          viewServices: true,
-          createServices: true,
-          updateServices: true,
-          deleteServices: true,
-          viewOffers: true,
-          createOffers: true,
-          updateOffers: true,
-          deleteOffers: true,
-          viewCategories: true,
-          createCategories: true,
-          updateCategories: true,
-          deleteCategories: true,
-          viewStores: true,
-          createStores: true,
-          updateStores: true,
-          deleteStores: true,
-          viewProviders: true,
-          approveProviders: true,
-          updateProviders: true,
-          deleteProviders: true,
-          viewWallets: true,
-          manageTransactions: true,
-          viewBasicReports: true,
-          viewAdvancedReports: true,
-          exportReports: true,
-          viewEmployees: true,
-          createEmployees: true,
-          updateEmployees: true,
-          deleteEmployees: true,
-          managePermissions: true,
-          manageSettings: true,
-          viewAuditLogs: true,
-          manageBackups: true,
-        };
-
-      default:
-        return {} as EmployeePermissions;
-    }
-  };
+    setPermissions(initialPermissions);
+    setHasChanges(false);
+  }, [initialPermissions]);
 
   const handlePermissionChange = (key: keyof EmployeePermissions) => {
-    const updatedPermissions = {
-      ...currentPermissions,
-      [key]: !currentPermissions[key],
+    const newPermissions = {
+      ...permissions,
+      [key]: !permissions[key],
     };
-    setCurrentPermissions(updatedPermissions);
-    onUpdate(updatedPermissions);
+    setPermissions(newPermissions);
+    setHasChanges(true);
   };
 
-  const permissionGroups = [
-    {
-      title: 'إدارة الطلبات',
-      permissions: [
-        { key: 'viewOrders', label: 'عرض الطلبات' },
-        { key: 'updateOrders', label: 'تحديث الطلبات' },
-        { key: 'deleteOrders', label: 'حذف الطلبات' },
-      ],
-    },
-    {
-      title: 'إدارة العملاء',
-      permissions: [
-        { key: 'viewCustomers', label: 'عرض العملاء' },
-        { key: 'updateCustomers', label: 'تحديث بيانات العملاء' },
-      ],
-    },
-    {
-      title: 'إدارة الخدمات',
-      permissions: [
-        { key: 'viewServices', label: 'عرض الخدمات' },
-        { key: 'createServices', label: 'إضافة خدمات' },
-        { key: 'updateServices', label: 'تعديل الخدمات' },
-        { key: 'deleteServices', label: 'حذف الخدمات' },
-      ],
-    },
-    {
-      title: 'إدارة العروض والخصومات',
-      permissions: [
-        { key: 'viewOffers', label: 'عرض العروض' },
-        { key: 'createOffers', label: 'إضافة عروض' },
-        { key: 'updateOffers', label: 'تعديل العروض' },
-        { key: 'deleteOffers', label: 'حذف العروض' },
-      ],
-    },
-    {
-      title: 'إدارة التصنيفات',
-      permissions: [
-        { key: 'viewCategories', label: 'عرض التصنيفات' },
-        { key: 'createCategories', label: 'إضافة تصنيفات' },
-        { key: 'updateCategories', label: 'تعديل التصنيفات' },
-        { key: 'deleteCategories', label: 'حذف التصنيفات' },
-      ],
-    },
-    {
-      title: 'إدارة المتاجر',
-      permissions: [
-        { key: 'viewStores', label: 'عرض المتاجر' },
-        { key: 'createStores', label: 'إضافة متاجر' },
-        { key: 'updateStores', label: 'تعديل المتاجر' },
-        { key: 'deleteStores', label: 'حذف المتاجر' },
-      ],
-    },
-    {
-      title: 'إدارة مقدمي الخدمات',
-      permissions: [
-        { key: 'viewProviders', label: 'عرض مقدمي الخدمات' },
-        { key: 'approveProviders', label: 'الموافقة على مقدمي الخدمات' },
-        { key: 'updateProviders', label: 'تعديل بيانات مقدمي الخدمات' },
-        { key: 'deleteProviders', label: 'حذف مقدمي الخدمات' },
-      ],
-    },
-    {
-      title: 'إدارة المحافظ والمدفوعات',
-      permissions: [
-        { key: 'viewWallets', label: 'عرض المحافظ' },
-        { key: 'manageTransactions', label: 'إدارة المعاملات المالية' },
-      ],
-    },
-    {
-      title: 'إدارة التقارير',
-      permissions: [
-        { key: 'viewBasicReports', label: 'عرض التقارير الأساسية' },
-        { key: 'viewAdvancedReports', label: 'عرض التقارير المتقدمة' },
-        { key: 'exportReports', label: 'تصدير التقارير' },
-      ],
-    },
-    {
-      title: 'إدارة الموظفين',
-      permissions: [
-        { key: 'viewEmployees', label: 'عرض الموظفين' },
-        { key: 'createEmployees', label: 'إضافة موظفين' },
-        { key: 'updateEmployees', label: 'تعديل بيانات الموظفين' },
-        { key: 'deleteEmployees', label: 'حذف الموظفين' },
-        { key: 'managePermissions', label: 'إدارة الصلاحيات' },
-      ],
-    },
-    {
-      title: 'إدارة النظام',
-      permissions: [
-        { key: 'manageSettings', label: 'إدارة إعدادات النظام' },
-        { key: 'viewAuditLogs', label: 'عرض سجل النشاطات' },
-        { key: 'manageBackups', label: 'إدارة النسخ الاحتياطية' },
-      ],
-    },
-  ];
+  const handleSave = () => {
+    onUpdate(permissions);
+    setHasChanges(false);
+  };
+
+  const handleReset = () => {
+    setPermissions(initialPermissions);
+    setHasChanges(false);
+  };
+
+  const handleApplyDefaults = () => {
+    const defaultRolePermissions = defaultPermissions[role];
+    const newPermissions = Object.keys(permissionLabels).reduce(
+      (acc, key) => ({
+        ...acc,
+        [key]: defaultRolePermissions.includes(key as keyof EmployeePermissions),
+      }),
+      {} as EmployeePermissions
+    );
+    setPermissions(newPermissions);
+    setHasChanges(true);
+  };
 
   return (
     <Box>
-      <Alert severity="info" sx={{ mb: 2 }}>
-        الصلاحيات المعروضة هي الصلاحيات الافتراضية للدور المحدد. يمكنك تعديلها حسب الحاجة.
-      </Alert>
+      <Box sx={{ mb: 2, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <Typography variant="h6">
+          صلاحيات {role === 'admin' ? 'المدير' : role === 'supervisor' ? 'المشرف' : role === 'sales' ? 'المبيعات' : 'خدمة العملاء'}
+        </Typography>
+        <Box>
+          <Button
+            variant="outlined"
+            color="primary"
+            onClick={handleApplyDefaults}
+            sx={{ ml: 1 }}
+          >
+            تطبيق الصلاحيات الافتراضية
+          </Button>
+          <Button
+            variant="outlined"
+            color="warning"
+            onClick={handleReset}
+            sx={{ ml: 1 }}
+            disabled={!hasChanges}
+          >
+            إلغاء التغييرات
+          </Button>
+          <Button
+            variant="contained"
+            color="primary"
+            onClick={handleSave}
+            disabled={!hasChanges}
+          >
+            حفظ التغييرات
+          </Button>
+        </Box>
+      </Box>
 
-      {permissionGroups.map((group) => (
-        <Accordion key={group.title} defaultExpanded>
-          <AccordionSummary expandIcon={<IconChevronDown />}>
-            <Typography variant="subtitle1" fontWeight="medium">
-              {group.title}
-            </Typography>
-          </AccordionSummary>
-          <AccordionDetails>
-            <FormGroup>
-              {group.permissions.map((permission) => (
-                <FormControlLabel
-                  key={permission.key}
-                  control={
-                    <Checkbox
-                      checked={currentPermissions[permission.key as keyof EmployeePermissions]}
-                      onChange={() =>
-                        handlePermissionChange(permission.key as keyof EmployeePermissions)
-                      }
-                    />
-                  }
-                  label={permission.label}
-                />
-              ))}
-            </FormGroup>
-          </AccordionDetails>
-        </Accordion>
-      ))}
+      {role === 'admin' && (
+        <Alert severity="info" sx={{ mb: 2 }}>
+          المدير لديه جميع الصلاحيات بشكل افتراضي
+        </Alert>
+      )}
+
+      <Grid container spacing={2}>
+        {Object.entries(permissionGroups).map(([group, { title, permissions: groupPermissions }]) => (
+          <Grid item xs={12} md={6} key={group}>
+            <Paper sx={{ p: 2 }}>
+              <Typography variant="subtitle1" fontWeight="bold" gutterBottom>
+                {title}
+              </Typography>
+              <Divider sx={{ my: 1 }} />
+              <FormGroup>
+                {groupPermissions.map((permission) => (
+                  <FormControlLabel
+                    key={permission}
+                    control={
+                      <Checkbox
+                        checked={permissions[permission as keyof EmployeePermissions] || false}
+                        onChange={() => handlePermissionChange(permission as keyof EmployeePermissions)}
+                        disabled={role === 'admin'}
+                      />
+                    }
+                    label={permissionLabels[permission as keyof EmployeePermissions]}
+                  />
+                ))}
+              </FormGroup>
+            </Paper>
+          </Grid>
+        ))}
+      </Grid>
+
+      {hasChanges && (
+        <Alert severity="warning" sx={{ mt: 2 }}>
+          لديك تغييرات غير محفوظة. يرجى حفظ التغييرات أو إلغائها.
+        </Alert>
+      )}
     </Box>
   );
 } 
