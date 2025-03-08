@@ -5,6 +5,8 @@ import { useQuery } from '@tanstack/react-query';
 import axios from 'axios';
 import { Box } from '@mui/material';
 import { motion } from 'framer-motion';
+import axiosInstance from '@/lib/axios';
+import API_ENDPOINTS from '@/lib/apis';
 
 interface RevenueData {
   month: string;
@@ -17,7 +19,7 @@ export function RevenueChart() {
   const { data: revenueData = [] } = useQuery<RevenueData[]>({
     queryKey: ['revenue-chart'],
     queryFn: async () => {
-      const response = await axios.get('/api/dashboard/revenue');
+      const response = await axiosInstance.get(API_ENDPOINTS.dashboard.revenue({},false));
       return response.data;
     },
   });

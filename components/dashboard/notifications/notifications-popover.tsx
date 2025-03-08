@@ -73,40 +73,40 @@ const notifications: Notification[] = [
     createdAt: new Date(2024, 2, 8, 10, 15),
   },
 ];
-
+let bgColor = (theme: any, type: Notification['type']) => {
+  switch (type) {
+    case 'order':
+      return alpha(theme.palette.info.main, 0.1);
+    case 'delivery':
+      return alpha(theme.palette.success.main, 0.1);
+    case 'wallet':
+      return alpha(theme.palette.warning.main, 0.1);
+    default:
+      return alpha(theme.palette.primary.main, 0.1);
+  }
+}
+let color = (theme: any, type: Notification['type']) => {
+  switch (type) {
+    case 'order':
+      return theme.palette.info.main;
+    case 'delivery':
+      return theme.palette.success.main;
+    case 'wallet':
+      return theme.palette.warning.main;
+    default:
+      return theme.palette.primary.main;
+  }
+}
 export function NotificationsPopover({ open, anchorEl, onClose }: NotificationsPopoverProps) {
   const unreadCount = notifications.filter(notification => !notification.isRead).length;
 
   const getNotificationIcon = (type: Notification['type']) => {
     const iconProps = {
-      size: 20,
+      size: 20, color: `${(theme: any) => color(theme, type)}`,
       style: {
         padding: '8px',
         borderRadius: '50%',
-        backgroundColor: (theme: any) => {
-          switch (type) {
-            case 'order':
-              return alpha(theme.palette.info.main, 0.1);
-            case 'delivery':
-              return alpha(theme.palette.success.main, 0.1);
-            case 'wallet':
-              return alpha(theme.palette.warning.main, 0.1);
-            default:
-              return alpha(theme.palette.primary.main, 0.1);
-          }
-        },
-        color: (theme: any) => {
-          switch (type) {
-            case 'order':
-              return theme.palette.info.main;
-            case 'delivery':
-              return theme.palette.success.main;
-            case 'wallet':
-              return theme.palette.warning.main;
-            default:
-              return theme.palette.primary.main;
-          }
-        },
+        backgroundColor: `${(theme: any) => bgColor(theme, type)}`
       },
     };
 
@@ -150,11 +150,11 @@ export function NotificationsPopover({ open, anchorEl, onClose }: NotificationsP
         },
       }}
     >
-      <Box 
-        sx={{ 
-          p: 2, 
-          display: 'flex', 
-          alignItems: 'center', 
+      <Box
+        sx={{
+          p: 2,
+          display: 'flex',
+          alignItems: 'center',
           justifyContent: 'space-between',
           borderBottom: '1px solid',
           borderColor: 'divider',
@@ -163,8 +163,8 @@ export function NotificationsPopover({ open, anchorEl, onClose }: NotificationsP
         }}
       >
         <Typography variant="h6" sx={{ fontWeight: 600 }}>الإشعارات</Typography>
-        <Badge 
-          badgeContent={unreadCount} 
+        <Badge
+          badgeContent={unreadCount}
           color="error"
           sx={{
             '& .MuiBadge-badge': {
@@ -186,8 +186,8 @@ export function NotificationsPopover({ open, anchorEl, onClose }: NotificationsP
           <IconBell size={24} />
         </Badge>
       </Box>
-      <List 
-        sx={{ 
+      <List
+        sx={{
           p: 0,
           maxHeight: 400,
           overflowY: 'auto',
@@ -232,8 +232,8 @@ export function NotificationsPopover({ open, anchorEl, onClose }: NotificationsP
                   >
                     {notification.description}
                   </Typography>
-                  <Typography 
-                    variant="caption" 
+                  <Typography
+                    variant="caption"
                     color="text.secondary"
                     sx={{
                       display: 'inline-flex',
@@ -250,8 +250,8 @@ export function NotificationsPopover({ open, anchorEl, onClose }: NotificationsP
               }
             />
             {!notification.isRead && (
-              <IconButton 
-                size="small" 
+              <IconButton
+                size="small"
                 color="primary"
                 sx={{
                   transition: 'transform 0.2s ease-in-out',
@@ -267,9 +267,9 @@ export function NotificationsPopover({ open, anchorEl, onClose }: NotificationsP
         ))}
       </List>
       {notifications.length === 0 && (
-        <Box 
-          sx={{ 
-            p: 4, 
+        <Box
+          sx={{
+            p: 4,
             textAlign: 'center',
             color: 'text.secondary',
           }}

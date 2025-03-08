@@ -11,6 +11,7 @@ import {
   Avatar,
   Divider,
 } from '@mui/material';
+
 import {
   IconUser,
   IconSettings,
@@ -79,11 +80,11 @@ export function ProfilePopover({ open, anchorEl, onClose, user }: ProfilePopover
   const getItemIcon = (Icon: typeof IconUser) => (
     <Icon
       size={20}
+      color={`${(theme: any) => alpha(theme.palette.primary.main || 'var(--primary)', 0.1) as any}`}
       style={{
         padding: '8px',
         borderRadius: '50%',
-        backgroundColor: (theme: any) => alpha(theme.palette.primary.main, 0.1),
-        color: (theme: any) => theme.palette.primary.main,
+        backgroundColor: `${(theme: any) => alpha(theme.palette.primary.main || 'var(--primary)', 0.1) as any}`,
       }}
     />
   );
@@ -115,8 +116,8 @@ export function ProfilePopover({ open, anchorEl, onClose, user }: ProfilePopover
         },
       }}
     >
-      <Box 
-        sx={{ 
+      <Box
+        sx={{
           p: 3,
           borderBottom: '1px solid',
           borderColor: 'divider',
@@ -124,18 +125,18 @@ export function ProfilePopover({ open, anchorEl, onClose, user }: ProfilePopover
           backgroundColor: (theme) => alpha(theme.palette.background.paper, 0.9),
         }}
       >
-        <Box 
-          sx={{ 
-            display: 'flex', 
-            alignItems: 'center', 
+        <Box
+          sx={{
+            display: 'flex',
+            alignItems: 'center',
             gap: 2,
           }}
         >
           <Avatar
             src={user?.imageUrl}
             alt={user?.name}
-            sx={{ 
-              width: 48, 
+            sx={{
+              width: 48,
               height: 48,
               border: '2px solid',
               borderColor: 'primary.main',
@@ -148,17 +149,17 @@ export function ProfilePopover({ open, anchorEl, onClose, user }: ProfilePopover
             {user?.name?.[0]}
           </Avatar>
           <Box>
-            <Typography 
-              variant="subtitle1" 
-              sx={{ 
+            <Typography
+              variant="subtitle1"
+              sx={{
                 fontWeight: 600,
                 color: 'primary.main',
               }}
             >
               {user?.name || 'مستخدم'}
             </Typography>
-            <Typography 
-              variant="body2" 
+            <Typography
+              variant="body2"
               color="text.secondary"
               sx={{
                 display: 'flex',
@@ -171,8 +172,8 @@ export function ProfilePopover({ open, anchorEl, onClose, user }: ProfilePopover
           </Box>
         </Box>
       </Box>
-      <List 
-        sx={{ 
+      <List
+        sx={{
           p: 1,
           maxHeight: 320,
           overflowY: 'auto',
@@ -205,7 +206,7 @@ export function ProfilePopover({ open, anchorEl, onClose, user }: ProfilePopover
             <ListItemIcon sx={{ minWidth: 40 }}>
               {getItemIcon(item.icon)}
             </ListItemIcon>
-            <ListItemText 
+            <ListItemText
               primary={
                 <Typography variant="subtitle2">
                   {item.title}
@@ -231,11 +232,11 @@ export function ProfilePopover({ open, anchorEl, onClose, user }: ProfilePopover
           <ListItemIcon sx={{ minWidth: 40 }}>
             {getItemIcon(IconLogout)}
           </ListItemIcon>
-          <ListItemText 
+          <ListItemText
             primary={
-              <Typography 
-                variant="subtitle2" 
-                sx={{ 
+              <Typography
+                variant="subtitle2"
+                sx={{
                   color: 'error.main',
                   fontWeight: 500,
                 }}

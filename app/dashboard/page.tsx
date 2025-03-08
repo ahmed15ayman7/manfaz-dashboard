@@ -16,7 +16,6 @@ import { RecentOrders } from '@/components/dashboard/recent-orders';
 import { RevenueChart } from '@/components/dashboard/revenue-chart';
 import { useQuery } from '@tanstack/react-query';
 import { useSession } from 'next-auth/react';
-import axios from 'axios';
 import API_ENDPOINTS from '@/lib/apis';
 import { PermissionGuard } from '@/components/common/PermissionGuard';
 import { EmployeePermissions } from '@/interfaces';

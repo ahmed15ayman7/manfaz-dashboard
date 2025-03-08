@@ -125,10 +125,10 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
   const sidebarWidth = 280;
 
   const sidebarContent = (
-    <Box 
-      sx={{ 
-        height: '100%', 
-        display: 'flex', 
+    <Box
+      sx={{
+        height: '100%',
+        display: 'flex',
         flexDirection: 'column',
         background: (theme) => `linear-gradient(${alpha(theme.palette.primary.main, 0.03)}, ${alpha(theme.palette.primary.main, 0.03)})`,
       }}
@@ -150,10 +150,10 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
             },
           }}
         >
-          <Box 
-            sx={{ 
-              display: 'flex', 
-              alignItems: 'center', 
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
               gap: 1,
               transition: 'transform 0.3s ease-in-out',
               '&:hover': {
@@ -162,8 +162,8 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
             }}
           >
             <img src="/logo.svg" alt="المُنفذ" width={32} height={32} />
-            <Typography 
-              variant="h6" 
+            <Typography
+              variant="h6"
               fontWeight="bold"
               sx={{
                 background: (theme) => `linear-gradient(45deg, ${theme.palette.primary.main}, ${theme.palette.primary.dark})`,
@@ -177,8 +177,8 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
             </Typography>
           </Box>
           {isMobile && (
-            <IconButton 
-              onClick={onClose} 
+            <IconButton
+              onClick={onClose}
               size="small"
               sx={{
                 transition: 'transform 0.2s ease-in-out',
@@ -192,8 +192,8 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
           )}
         </Box>
 
-        <List 
-          sx={{ 
+        <List
+          sx={{
             p: 0,
             '& > *': {
               transition: 'transform 0.2s ease-in-out',
@@ -248,7 +248,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
           width: sidebarWidth,
           position: 'fixed',
           top: 0,
-          right: 0,
+          left: 0,
           borderLeft: '1px solid',
           borderColor: 'divider',
           display: { xs: 'none', md: 'block' },
@@ -260,17 +260,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
       >
         {sidebarContent}
       </Paper>
-      <Box
-        component="main"
-        sx={{
-          minHeight: '100vh',
-          marginRight: { xs: 0, md: `${sidebarWidth}px` },
-          transition: 'margin 0.3s ease-in-out',
-          width: { xs: '100%', md: `calc(100% - ${sidebarWidth}px)` },
-        }}
-      >
-        {/* هنا يتم وضع محتوى الصفحة */}
-      </Box>
+
     </>
   );
 } 

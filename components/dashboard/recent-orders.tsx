@@ -11,14 +11,14 @@ import {
   Chip,
 } from '@mui/material';
 import { useQuery } from '@tanstack/react-query';
-import axios from 'axios';
 import { Order } from '@/interfaces';
-
+import axiosInstance from '@/lib/axios';
+import API_ENDPOINTS from '@/lib/apis';
 export function RecentOrders() {
   const { data: orders = [] } = useQuery<Order[]>({
     queryKey: ['recent-orders'],
     queryFn: async () => {
-      const response = await axios.get('/api/orders?limit=5');
+      const response = await axiosInstance.get(API_ENDPOINTS.orders.getAll({ limit: 5 }, false));
       return response.data;
     },
   });

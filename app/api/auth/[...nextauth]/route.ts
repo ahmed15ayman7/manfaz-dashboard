@@ -25,8 +25,8 @@ const handler = NextAuth({
             password: credentials?.password,
             role: credentials?.role,
           });
-
           const user = response.data;
+          console.log("user", user);
           if (user) {
             if (user) {
               authService.setTokens(user.accessToken, user.refreshToken);
@@ -44,6 +44,7 @@ const handler = NextAuth({
           }
           return null;
         } catch (error: any) {
+          console.log("error", error);
           throw new Error("فشل تسجيل الدخول. يرجى التحقق من بيانات الاعتماد الخاصة بك." + error.message);
         }
       },

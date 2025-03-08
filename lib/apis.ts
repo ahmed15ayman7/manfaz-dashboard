@@ -1,7 +1,7 @@
 import { BASE_URL } from './config';
 const appendQueryParams = (url: string, params: Record<string, any> = {}, isBaseUrl = true) => {
   const query = new URLSearchParams(params).toString();
-  return query ? `${isBaseUrl ? BASE_URL : ''}${url}?${query}` : `${isBaseUrl ? BASE_URL : ''}${url}`;
+  return query ? `${isBaseUrl ? BASE_URL : ''}${url}?lang=ar&${query}` : `${isBaseUrl ? BASE_URL : ''}${url}?lang=ar`;
 };
 const API_ENDPOINTS = {
   auth: {
@@ -156,6 +156,7 @@ const API_ENDPOINTS = {
   },
   dashboard: {
     getStats: (params: Record<string, any>, isBaseUrl: boolean = true) => appendQueryParams('/dashboard/stats', params, isBaseUrl),
+    revenue: (params: Record<string, any>, isBaseUrl: boolean = true) => appendQueryParams('/dashboard/revenue', params, isBaseUrl),
   },
   locations: {
     getAll: (params: Record<string, any>, isBaseUrl: boolean = true) => appendQueryParams('/locations', params, isBaseUrl),

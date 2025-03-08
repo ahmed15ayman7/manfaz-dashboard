@@ -36,15 +36,6 @@ export function NavItem({ title, path, icon: Icon, active }: NavItemProps) {
         },
       }}
     >
-      <ListItemText
-        primary={title}
-        primaryTypographyProps={{
-          fontSize: 14,
-          fontWeight: active ? 600 : 400,
-          textAlign: 'right',
-        }}
-        sx={{ margin: 0 }}
-      />
       <ListItemIcon
         sx={{
           minWidth: 'unset',
@@ -63,6 +54,15 @@ export function NavItem({ title, path, icon: Icon, active }: NavItemProps) {
           <Icon stroke={1.5} size={20} />
         </Box>
       </ListItemIcon>
+          <ListItemText
+            primary={title}
+            primaryTypographyProps={{
+              fontSize: 14,
+              fontWeight: active ? 600 : 400,
+              textAlign: 'left',
+            }}
+            sx={{ margin: 0 }}
+          />
     </ListItemButton>
   );
 } 
