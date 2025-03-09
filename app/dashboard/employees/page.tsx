@@ -286,7 +286,10 @@ export default function EmployeesPage() {
           <Typography variant="h5" fontWeight="bold">
             إدارة الموظفين
           </Typography>
-          <Stack direction="row" spacing={2}>
+          <Stack direction="row" sx={{
+            flexDirection: { xs: 'column', md: 'row' },
+            justifyContent: { xs: 'center', md: 'flex-start' },
+          }} spacing={2}>
             <ExcelExport
               data={excelData || []}
               columns={excelColumns}
