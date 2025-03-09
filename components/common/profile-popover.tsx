@@ -128,7 +128,9 @@ export function ProfilePopover({ open, anchorEl, onClose, user }: ProfilePopover
         <Box
           sx={{
             display: 'flex',
+            flexDirection: { xs: 'column', md: 'row' },
             alignItems: 'center',
+            justifyContent: { xs: 'center', md: 'flex-start' },
             gap: 2,
           }}
         >
@@ -138,8 +140,9 @@ export function ProfilePopover({ open, anchorEl, onClose, user }: ProfilePopover
             sx={{
               width: 48,
               height: 48,
+              bgcolor: 'primary.dark',
               border: '2px solid',
-              borderColor: 'primary.main',
+              borderColor: 'primary.light',
               transition: 'transform 0.2s ease-in-out',
               '&:hover': {
                 transform: 'scale(1.1)',
@@ -162,7 +165,7 @@ export function ProfilePopover({ open, anchorEl, onClose, user }: ProfilePopover
               variant="body2"
               color="text.secondary"
               sx={{
-                display: 'flex',
+                display: { xs: 'none', md: 'flex' },
                 alignItems: 'center',
                 gap: 0.5,
               }}
