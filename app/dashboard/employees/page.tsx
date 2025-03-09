@@ -29,6 +29,7 @@ import {
   Stack,
   Tab,
   Tabs,
+  Skeleton,
 } from '@mui/material';
 import {
   IconEdit,
@@ -46,7 +47,7 @@ import { ExcelExport } from '@/components/shared/excel-export';
 import { PDFDocument } from '@/components/shared/pdf-document';
 import { Employee, EmployeeRole, EmployeePermissions } from '@/interfaces';
 import PermissionsManager from '@/components/employees/permissions-manager';
-
+import { PermissionGuard } from '@/components/common/PermissionGuard';
 interface TabPanelProps {
   children?: React.ReactNode;
   index: number;
@@ -93,19 +94,19 @@ export default function EmployeesPage() {
     queryKey: ['employees', page, search],
     queryFn: async () => {
       const response = await axios.get(API_ENDPOINTS.employees.getAll({ page, search }));
-      return response.data;
+      return response.data.data;
     },
   });
 
   // استدعاء نشاطات الموظف
-  const { data: activitiesData } = useQuery({
+  const { data: activitiesData, isLoading: isActivitiesLoading } = useQuery({
     queryKey: ['employee-activities', selectedEmployee?.id],
     queryFn: async () => {
       if (!selectedEmployee) return null;
       const response = await axios.get(
         API_ENDPOINTS.employeeActivities.getByEmployee(selectedEmployee.id, {})
       );
-      return response.data;
+      return response.data.data;
     },
     enabled: !!selectedEmployee,
   });
@@ -114,7 +115,7 @@ export default function EmployeesPage() {
   const addMutation = useMutation({
     mutationFn: async (data: any) => {
       const response = await axios.post(API_ENDPOINTS.employees.create({}), data);
-      return response.data;
+      return response.data.data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['employees'] });
@@ -129,7 +130,7 @@ export default function EmployeesPage() {
         API_ENDPOINTS.employees.update(selectedEmployee!.id, {}),
         data
       );
-      return response.data;
+      return response.data.data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['employees'] });
@@ -141,7 +142,7 @@ export default function EmployeesPage() {
   const deleteMutation = useMutation({
     mutationFn: async (id: string) => {
       const response = await axios.delete(API_ENDPOINTS.employees.delete(id, {}));
-      return response.data;
+      return response.data.data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['employees'] });
@@ -155,7 +156,7 @@ export default function EmployeesPage() {
         API_ENDPOINTS.employees.updatePermissions(selectedEmployee!.id, {}),
         { permissions }
       );
-      return response.data;
+      return response.data.data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['employees'] });
@@ -236,7 +237,23 @@ export default function EmployeesPage() {
     { header: 'الحالة', key: 'isActive' },
     { header: 'تاريخ الإنشاء', key: 'createdAt' },
   ];
-
+  if (isLoading || isActivitiesLoading) {
+    return (
+      <Box>
+        <Box sx={{ mb: 4 }}>
+          <Skeleton variant="text" width={200} height={40} />
+        </Box>
+        <Grid container spacing={3} mb={4}>
+          {[...Array(4)].map((_, index) => (
+            <Grid item xs={12} md={3} key={index}>
+              <Skeleton variant="rectangular" height={100} />
+            </Grid>
+          ))}
+        </Grid>
+        <Skeleton variant="rectangular" height={400} />
+      </Box>
+    );
+  }
   // تحضير بيانات ملف Excel
   const excelData = employeesData?.employees.map((employee: Employee) => ({
     name: employee.name,
@@ -263,329 +280,331 @@ export default function EmployeesPage() {
   } : null;
 
   return (
-    <Box>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-        <Typography variant="h5" fontWeight="bold">
-          إدارة الموظفين
-        </Typography>
-        <Stack direction="row" spacing={2}>
-          <ExcelExport
-            data={excelData || []}
-            columns={excelColumns}
-            filename="الموظفين"
-          />
-          <Button
-            variant="contained"
-            startIcon={<IconPlus size={20} />}
-            onClick={() => handleOpenDialog()}
-          >
-            إضافة موظف
-          </Button>
-        </Stack>
-      </Box>
-
-      <Paper sx={{ p: 2 }}>
-        <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 2 }}>
-          <Tabs value={tabValue} onChange={(e, newValue) => setTabValue(newValue)}>
-            <Tab label="قائمة الموظفين" />
-            <Tab label="سجل النشاطات" />
-          </Tabs>
+    <PermissionGuard requiredPermissions={['viewEmployees', 'createEmployees', 'updateEmployees', 'deleteEmployees', "managePermissions"]}>
+      <Box>
+        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
+          <Typography variant="h5" fontWeight="bold">
+            إدارة الموظفين
+          </Typography>
+          <Stack direction="row" spacing={2}>
+            <ExcelExport
+              data={excelData || []}
+              columns={excelColumns}
+              filename="الموظفين"
+            />
+            <Button
+              variant="contained"
+              startIcon={<IconPlus size={20} />}
+              onClick={() => handleOpenDialog()}
+            >
+              إضافة موظف
+            </Button>
+          </Stack>
         </Box>
 
-        <TabPanel value={tabValue} index={0}>
-          <TextField
-            fullWidth
-            label="بحث"
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            sx={{ mb: 2 }}
-          />
-
-          <TableContainer>
-            <Table>
-              <TableHead>
-                <TableRow>
-                  <TableCell>الاسم</TableCell>
-                  <TableCell>البريد الإلكتروني</TableCell>
-                  <TableCell>رقم الهاتف</TableCell>
-                  <TableCell>الدور</TableCell>
-                  <TableCell>الحالة</TableCell>
-                  <TableCell>الإجراءات</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {employeesData?.employees.map((employee: Employee) => (
-                  <TableRow key={employee.id}>
-                    <TableCell>{employee.name}</TableCell>
-                    <TableCell>{employee.email}</TableCell>
-                    <TableCell>{employee.phone}</TableCell>
-                    <TableCell>
-                      <Chip
-                        label={employee.role}
-                        color={
-                          employee.role === 'admin'
-                            ? 'error'
-                            : employee.role === 'supervisor'
-                              ? 'warning'
-                              : employee.role === 'sales'
-                                ? 'info'
-                                : 'success'
-                        }
-                      />
-                    </TableCell>
-                    <TableCell>
-                      <Chip
-                        label={employee.isActive ? 'نشط' : 'غير نشط'}
-                        color={employee.isActive ? 'success' : 'error'}
-                      />
-                    </TableCell>
-                    <TableCell>
-                      <Stack direction="row" spacing={1}>
-                        <IconButton
-                          color="primary"
-                          onClick={() => handleViewActivities(employee)}
-                        >
-                          <IconActivity size={20} />
-                        </IconButton>
-                        <IconButton
-                          color="info"
-                          onClick={() => handlePrintReport(employee)}
-                        >
-                          <IconFileReport size={20} />
-                        </IconButton>
-                        <IconButton
-                          color="secondary"
-                          onClick={() => handleOpenPermissions(employee)}
-                        >
-                          <IconLock size={20} />
-                        </IconButton>
-                        <IconButton
-                          color="warning"
-                          onClick={() => handleOpenDialog(employee)}
-                        >
-                          <IconEdit size={20} />
-                        </IconButton>
-                        <IconButton
-                          color="error"
-                          onClick={() => handleDelete(employee.id)}
-                        >
-                          <IconTrash size={20} />
-                        </IconButton>
-                      </Stack>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
-
-          <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
-            <Pagination
-              count={Math.ceil((employeesData?.total || 0) / 10)}
-              page={page}
-              onChange={(e, value) => setPage(value)}
-              color="primary"
-            />
+        <Paper sx={{ p: 2 }}>
+          <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 2 }}>
+            <Tabs value={tabValue} onChange={(e, newValue) => setTabValue(newValue)}>
+              <Tab label="قائمة الموظفين" />
+              <Tab label="سجل النشاطات" />
+            </Tabs>
           </Box>
-        </TabPanel>
 
-        <TabPanel value={tabValue} index={1}>
-          <TableContainer>
-            <Table>
-              <TableHead>
-                <TableRow>
-                  <TableCell>الموظف</TableCell>
-                  <TableCell>الإجراء</TableCell>
-                  <TableCell>التفاصيل</TableCell>
-                  <TableCell>التاريخ</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {activitiesData?.activities.map((activity: any) => (
-                  <TableRow key={activity.id}>
-                    <TableCell>{activity.employeeName}</TableCell>
-                    <TableCell>{activity.action}</TableCell>
-                    <TableCell>{activity.details}</TableCell>
-                    <TableCell>
-                      {new Date(activity.createdAt).toLocaleString('ar-SA')}
-                    </TableCell>
+          <TabPanel value={tabValue} index={0}>
+            <TextField
+              fullWidth
+              label="بحث"
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              sx={{ mb: 2 }}
+            />
+
+            <TableContainer>
+              <Table>
+                <TableHead>
+                  <TableRow>
+                    <TableCell>الاسم</TableCell>
+                    <TableCell>البريد الإلكتروني</TableCell>
+                    <TableCell>رقم الهاتف</TableCell>
+                    <TableCell>الدور</TableCell>
+                    <TableCell>الحالة</TableCell>
+                    <TableCell>الإجراءات</TableCell>
                   </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
-        </TabPanel>
-      </Paper>
+                </TableHead>
+                <TableBody>
+                  {employeesData?.employees.map((employee: Employee) => (
+                    <TableRow key={employee.id}>
+                      <TableCell>{employee.name}</TableCell>
+                      <TableCell>{employee.email}</TableCell>
+                      <TableCell>{employee.phone}</TableCell>
+                      <TableCell>
+                        <Chip
+                          label={employee.role}
+                          color={
+                            employee.role === 'admin'
+                              ? 'error'
+                              : employee.role === 'supervisor'
+                                ? 'warning'
+                                : employee.role === 'sales'
+                                  ? 'info'
+                                  : 'success'
+                          }
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <Chip
+                          label={employee.isActive ? 'نشط' : 'غير نشط'}
+                          color={employee.isActive ? 'success' : 'error'}
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <Stack direction="row" spacing={1}>
+                          <IconButton
+                            color="primary"
+                            onClick={() => handleViewActivities(employee)}
+                          >
+                            <IconActivity size={20} />
+                          </IconButton>
+                          <IconButton
+                            color="info"
+                            onClick={() => handlePrintReport(employee)}
+                          >
+                            <IconFileReport size={20} />
+                          </IconButton>
+                          <IconButton
+                            color="secondary"
+                            onClick={() => handleOpenPermissions(employee)}
+                          >
+                            <IconLock size={20} />
+                          </IconButton>
+                          <IconButton
+                            color="warning"
+                            onClick={() => handleOpenDialog(employee)}
+                          >
+                            <IconEdit size={20} />
+                          </IconButton>
+                          <IconButton
+                            color="error"
+                            onClick={() => handleDelete(employee.id)}
+                          >
+                            <IconTrash size={20} />
+                          </IconButton>
+                        </Stack>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
 
-      {/* نافذة إضافة/تعديل موظف */}
-      <Dialog open={openDialog} onClose={handleCloseDialog} maxWidth="md" fullWidth>
-        <DialogTitle>
-          {selectedEmployee ? 'تعديل موظف' : 'إضافة موظف جديد'}
-        </DialogTitle>
-        <form onSubmit={handleSubmit}>
-          <DialogContent>
-            <Grid container spacing={2}>
-              <Grid item xs={12} md={6}>
-                <TextField
-                  fullWidth
-                  label="الاسم"
-                  value={formData.name}
-                  onChange={(e) =>
-                    setFormData({ ...formData, name: e.target.value })
-                  }
-                  required
-                />
-              </Grid>
-              <Grid item xs={12} md={6}>
-                <TextField
-                  fullWidth
-                  label="البريد الإلكتروني"
-                  type="email"
-                  value={formData.email}
-                  onChange={(e) =>
-                    setFormData({ ...formData, email: e.target.value })
-                  }
-                  required
-                />
-              </Grid>
-              <Grid item xs={12} md={6}>
-                <TextField
-                  fullWidth
-                  label="رقم الهاتف"
-                  value={formData.phone}
-                  onChange={(e) =>
-                    setFormData({ ...formData, phone: e.target.value })
-                  }
-                  required
-                />
-              </Grid>
-              <Grid item xs={12} md={6}>
-                <TextField
-                  fullWidth
-                  label="كلمة المرور"
-                  type="password"
-                  value={formData.password}
-                  onChange={(e) =>
-                    setFormData({ ...formData, password: e.target.value })
-                  }
-                  required={!selectedEmployee}
-                />
-              </Grid>
-              <Grid item xs={12}>
-                <FormControl fullWidth>
-                  <InputLabel>الدور</InputLabel>
-                  <Select
-                    value={formData.role}
-                    label="الدور"
+            <Box sx={{ display: 'flex', justifyContent: 'center', mt: 2 }}>
+              <Pagination
+                count={Math.ceil((employeesData?.total || 0) / 10)}
+                page={page}
+                onChange={(e, value) => setPage(value)}
+                color="primary"
+              />
+            </Box>
+          </TabPanel>
+
+          <TabPanel value={tabValue} index={1}>
+            <TableContainer>
+              <Table>
+                <TableHead>
+                  <TableRow>
+                    <TableCell>الموظف</TableCell>
+                    <TableCell>الإجراء</TableCell>
+                    <TableCell>التفاصيل</TableCell>
+                    <TableCell>التاريخ</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {activitiesData?.activities.map((activity: any) => (
+                    <TableRow key={activity.id}>
+                      <TableCell>{activity.employeeName}</TableCell>
+                      <TableCell>{activity.action}</TableCell>
+                      <TableCell>{activity.details}</TableCell>
+                      <TableCell>
+                        {new Date(activity.createdAt).toLocaleString('ar-SA')}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
+          </TabPanel>
+        </Paper>
+
+        {/* نافذة إضافة/تعديل موظف */}
+        <Dialog open={openDialog} onClose={handleCloseDialog} maxWidth="md" fullWidth>
+          <DialogTitle>
+            {selectedEmployee ? 'تعديل موظف' : 'إضافة موظف جديد'}
+          </DialogTitle>
+          <form onSubmit={handleSubmit}>
+            <DialogContent>
+              <Grid container spacing={2}>
+                <Grid item xs={12} md={6}>
+                  <TextField
+                    fullWidth
+                    label="الاسم"
+                    value={formData.name}
                     onChange={(e) =>
-                      setFormData({
-                        ...formData,
-                        role: e.target.value as EmployeeRole,
-                      })
+                      setFormData({ ...formData, name: e.target.value })
                     }
-                  >
-                    <MenuItem value="customer_service">خدمة العملاء</MenuItem>
-                    <MenuItem value="sales">المبيعات</MenuItem>
-                    <MenuItem value="supervisor">مشرف</MenuItem>
-                    <MenuItem value="admin">مدير</MenuItem>
-                  </Select>
-                </FormControl>
+                    required
+                  />
+                </Grid>
+                <Grid item xs={12} md={6}>
+                  <TextField
+                    fullWidth
+                    label="البريد الإلكتروني"
+                    type="email"
+                    value={formData.email}
+                    onChange={(e) =>
+                      setFormData({ ...formData, email: e.target.value })
+                    }
+                    required
+                  />
+                </Grid>
+                <Grid item xs={12} md={6}>
+                  <TextField
+                    fullWidth
+                    label="رقم الهاتف"
+                    value={formData.phone}
+                    onChange={(e) =>
+                      setFormData({ ...formData, phone: e.target.value })
+                    }
+                    required
+                  />
+                </Grid>
+                <Grid item xs={12} md={6}>
+                  <TextField
+                    fullWidth
+                    label="كلمة المرور"
+                    type="password"
+                    value={formData.password}
+                    onChange={(e) =>
+                      setFormData({ ...formData, password: e.target.value })
+                    }
+                    required={!selectedEmployee}
+                  />
+                </Grid>
+                <Grid item xs={12}>
+                  <FormControl fullWidth>
+                    <InputLabel>الدور</InputLabel>
+                    <Select
+                      value={formData.role}
+                      label="الدور"
+                      onChange={(e) =>
+                        setFormData({
+                          ...formData,
+                          role: e.target.value as EmployeeRole,
+                        })
+                      }
+                    >
+                      <MenuItem value="customer_service">خدمة العملاء</MenuItem>
+                      <MenuItem value="sales">المبيعات</MenuItem>
+                      <MenuItem value="supervisor">مشرف</MenuItem>
+                      <MenuItem value="admin">مدير</MenuItem>
+                    </Select>
+                  </FormControl>
+                </Grid>
               </Grid>
-            </Grid>
+            </DialogContent>
+            <DialogActions>
+              <Button onClick={handleCloseDialog}>إلغاء</Button>
+              <Button
+                type="submit"
+                variant="contained"
+                disabled={addMutation.isPending || updateMutation.isPending}
+              >
+                {selectedEmployee ? 'تحديث' : 'إضافة'}
+              </Button>
+            </DialogActions>
+          </form>
+        </Dialog>
+
+        {/* نافذة عرض نشاطات الموظف */}
+        <Dialog
+          open={openActivityDialog}
+          onClose={() => setOpenActivityDialog(false)}
+          maxWidth="md"
+          fullWidth
+        >
+          <DialogTitle>نشاطات الموظف</DialogTitle>
+          <DialogContent>
+            <TableContainer>
+              <Table>
+                <TableHead>
+                  <TableRow>
+                    <TableCell>الإجراء</TableCell>
+                    <TableCell>التفاصيل</TableCell>
+                    <TableCell>التاريخ</TableCell>
+                  </TableRow>
+                </TableHead>
+                <TableBody>
+                  {activitiesData?.activities.map((activity: any) => (
+                    <TableRow key={activity.id}>
+                      <TableCell>{activity.action}</TableCell>
+                      <TableCell>{activity.details}</TableCell>
+                      <TableCell>
+                        {new Date(activity.createdAt).toLocaleString('ar-SA')}
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TableContainer>
           </DialogContent>
           <DialogActions>
-            <Button onClick={handleCloseDialog}>إلغاء</Button>
-            <Button
-              type="submit"
-              variant="contained"
-              disabled={addMutation.isPending || updateMutation.isPending}
-            >
-              {selectedEmployee ? 'تحديث' : 'إضافة'}
-            </Button>
+            <Button onClick={() => setOpenActivityDialog(false)}>إغلاق</Button>
           </DialogActions>
-        </form>
-      </Dialog>
+        </Dialog>
 
-      {/* نافذة عرض نشاطات الموظف */}
-      <Dialog
-        open={openActivityDialog}
-        onClose={() => setOpenActivityDialog(false)}
-        maxWidth="md"
-        fullWidth
-      >
-        <DialogTitle>نشاطات الموظف</DialogTitle>
-        <DialogContent>
-          <TableContainer>
-            <Table>
-              <TableHead>
-                <TableRow>
-                  <TableCell>الإجراء</TableCell>
-                  <TableCell>التفاصيل</TableCell>
-                  <TableCell>التاريخ</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {activitiesData?.activities.map((activity: any) => (
-                  <TableRow key={activity.id}>
-                    <TableCell>{activity.action}</TableCell>
-                    <TableCell>{activity.details}</TableCell>
-                    <TableCell>
-                      {new Date(activity.createdAt).toLocaleString('ar-SA')}
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </TableContainer>
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setOpenActivityDialog(false)}>إغلاق</Button>
-        </DialogActions>
-      </Dialog>
+        {/* نافذة طباعة التقرير */}
+        <Dialog
+          open={openPrintDialog}
+          onClose={() => setOpenPrintDialog(false)}
+          maxWidth="md"
+          fullWidth
+        >
+          <DialogTitle>تقرير الموظف</DialogTitle>
+          <DialogContent>
+            {pdfData && (
+              <PDFDocument
+                title={pdfData.title}
+                template="report"
+                data={pdfData}
+              />
+            )}
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setOpenPrintDialog(false)}>إغلاق</Button>
+          </DialogActions>
+        </Dialog>
 
-      {/* نافذة طباعة التقرير */}
-      <Dialog
-        open={openPrintDialog}
-        onClose={() => setOpenPrintDialog(false)}
-        maxWidth="md"
-        fullWidth
-      >
-        <DialogTitle>تقرير الموظف</DialogTitle>
-        <DialogContent>
-          {pdfData && (
-            <PDFDocument
-              title={pdfData.title}
-              template="report"
-              data={pdfData}
-            />
-          )}
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setOpenPrintDialog(false)}>إغلاق</Button>
-        </DialogActions>
-      </Dialog>
-
-      {/* نافذة إدارة الصلاحيات */}
-      <Dialog
-        open={openPermissionsDialog}
-        onClose={() => setOpenPermissionsDialog(false)}
-        maxWidth="md"
-        fullWidth
-      >
-        <DialogTitle>إدارة صلاحيات الموظف</DialogTitle>
-        <DialogContent>
-          {selectedEmployee && (
-            <PermissionsManager
-              role={selectedEmployee.role}
-              permissions={selectedEmployee.permissions}
-              onUpdate={handleUpdatePermissions}
-            />
-          )}
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setOpenPermissionsDialog(false)}>إغلاق</Button>
-        </DialogActions>
-      </Dialog>
-    </Box>
+        {/* نافذة إدارة الصلاحيات */}
+        <Dialog
+          open={openPermissionsDialog}
+          onClose={() => setOpenPermissionsDialog(false)}
+          maxWidth="md"
+          fullWidth
+        >
+          <DialogTitle>إدارة صلاحيات الموظف</DialogTitle>
+          <DialogContent>
+            {selectedEmployee && (
+              <PermissionsManager
+                role={selectedEmployee.role}
+                permissions={selectedEmployee.permissions}
+                onUpdate={handleUpdatePermissions}
+              />
+            )}
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setOpenPermissionsDialog(false)}>إغلاق</Button>
+          </DialogActions>
+        </Dialog>
+      </Box>
+    </PermissionGuard>
   );
 } 

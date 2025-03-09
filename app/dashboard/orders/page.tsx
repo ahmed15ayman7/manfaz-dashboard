@@ -125,7 +125,7 @@ export default function OrdersPage() {
     queryKey: ['users'],
     queryFn: async () => {
       const response = await axios.get(API_ENDPOINTS.users.getAll({}));
-      return response.data;
+      return response.data.data;
     },
   });
 
@@ -133,7 +133,7 @@ export default function OrdersPage() {
     queryKey: ['services'],
     queryFn: async () => {
       const response = await axios.get(API_ENDPOINTS.services.getAll({}));
-      return response.data;
+      return response.data.data;
     },
   });
 
@@ -141,7 +141,7 @@ export default function OrdersPage() {
     queryKey: ['workers'],
     queryFn: async () => {
       const response = await axios.get(API_ENDPOINTS.workers.getAll({}));
-      return response.data;
+      return response.data.data;
     },
   });
 
@@ -149,15 +149,15 @@ export default function OrdersPage() {
     queryKey: ['drivers'],
     queryFn: async () => {
       const response = await axios.get(API_ENDPOINTS.deliveryDrivers.getAll({}));
-      return response.data;
+      return response.data.data;
     },
   });
 
-  const { data: orders, isLoading } = useQuery<Order[]>({
+  const { data: orders, isLoading } = useQuery<{ orders: Order[] }>({
     queryKey: ['orders'],
     queryFn: async () => {
       const response = await axios.get(API_ENDPOINTS.orders.getAll({}));
-      return response.data;
+      return response.data.data;
     },
   });
 
@@ -165,7 +165,7 @@ export default function OrdersPage() {
   const addOrderMutation = useMutation({
     mutationFn: async (order: typeof orderData) => {
       const response = await axios.post(API_ENDPOINTS.orders.create({}), order);
-      return response.data;
+      return response.data.data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['orders'] });
@@ -177,7 +177,7 @@ export default function OrdersPage() {
   const updateOrderMutation = useMutation({
     mutationFn: async ({ id, data }: { id: string; data: typeof orderData }) => {
       const response = await axios.put(API_ENDPOINTS.orders.update(id, {}), data);
-      return response.data;
+      return response.data.data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['orders'] });
@@ -189,7 +189,7 @@ export default function OrdersPage() {
   const deleteOrderMutation = useMutation({
     mutationFn: async (id: string) => {
       const response = await axios.delete(API_ENDPOINTS.orders.delete(id, {}));
-      return response.data;
+      return response.data.data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['orders'] });
@@ -207,9 +207,51 @@ export default function OrdersPage() {
     { header: 'حالة الدفع', key: 'paymentStatus', width: 15 },
     { header: 'تاريخ الطلب', key: 'createdAt', width: 20 },
   ];
+  if (isLoading) {
+    return (
+      <Box>
+        <Box sx={{ mb: 4, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <Skeleton variant="text" width={200} height={40} />
+          <Skeleton variant="rectangular" width={120} height={36} />
+        </Box>
+        <TableContainer component={Paper}>
+          <Table>
+            <TableHead>
+              <TableRow>
+                {[
+                  'رقم الطلب',
+                  'العميل',
+                  'الخدمة',
+                  'السعر',
+                  'حالة الطلب',
+                  'حالة الدفع',
+                  'الإجراءات',
+                ].map((header) => (
+                  <TableCell key={header}>
+                    <Skeleton variant="text" />
+                  </TableCell>
+                ))}
+              </TableRow>
+            </TableHead>
+            <TableBody>
+              {[...Array(5)].map((_, index) => (
+                <TableRow key={index}>
+                  {[...Array(7)].map((_, cellIndex) => (
+                    <TableCell key={cellIndex}>
+                      <Skeleton variant="text" />
+                    </TableCell>
+                  ))}
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      </Box>
+    );
+  }
 
   // تحضير بيانات Excel
-  const excelData = orders?.map(order => ({
+  const excelData = orders?.orders.map(order => ({
     id: order.id,
     customerName: order.user?.name,
     serviceName: order.service?.name,
@@ -296,7 +338,7 @@ export default function OrdersPage() {
   };
 
   // تصفية الطلبات حسب البحث
-  const filteredOrders = orders?.filter((order) => {
+  const filteredOrders = orders?.orders.filter((order: Order) => {
     const user = users?.find(u => u.id === order.userId);
     return user?.name.toLowerCase().includes(searchQuery.toLowerCase());
   });
@@ -304,9 +346,9 @@ export default function OrdersPage() {
   // حساب الإحصائيات
   const stats = {
     totalOrders: filteredOrders?.length || 0,
-    pendingOrders: filteredOrders?.filter(o => o.status === 'pending').length || 0,
-    completedOrders: filteredOrders?.filter(o => o.status === 'completed').length || 0,
-    totalRevenue: filteredOrders?.reduce((sum, order) => sum + (order.price || 0), 0) || 0,
+    pendingOrders: filteredOrders?.filter((o: Order) => o.status === 'pending').length || 0,
+    completedOrders: filteredOrders?.filter((o: Order) => o.status === 'completed').length || 0,
+    totalRevenue: filteredOrders?.reduce((sum: number, order: Order) => sum + (order.price || 0), 0) || 0,
   };
 
   // تنسيق التاريخ
@@ -339,48 +381,6 @@ export default function OrdersPage() {
     grandTotal: selectedOrder.price ? selectedOrder.price * 1.15 : 0,
   } : null;
 
-  if (isLoading) {
-    return (
-      <Box>
-        <Box sx={{ mb: 4, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <Skeleton variant="text" width={200} height={40} />
-          <Skeleton variant="rectangular" width={120} height={36} />
-        </Box>
-        <TableContainer component={Paper}>
-          <Table>
-            <TableHead>
-              <TableRow>
-                {[
-                  'رقم الطلب',
-                  'العميل',
-                  'الخدمة',
-                  'السعر',
-                  'حالة الطلب',
-                  'حالة الدفع',
-                  'الإجراءات',
-                ].map((header) => (
-                  <TableCell key={header}>
-                    <Skeleton variant="text" />
-                  </TableCell>
-                ))}
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {[...Array(5)].map((_, index) => (
-                <TableRow key={index}>
-                  {[...Array(7)].map((_, cellIndex) => (
-                    <TableCell key={cellIndex}>
-                      <Skeleton variant="text" />
-                    </TableCell>
-                  ))}
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-        </TableContainer>
-      </Box>
-    );
-  }
 
   return (
     <PermissionGuard requiredPermissions={['viewOrders']}>
@@ -491,7 +491,7 @@ export default function OrdersPage() {
             <TableBody>
               {(filteredOrders || [])
                 .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-                .map((order) => {
+                .map((order: Order) => {
                   const user = users?.find(u => u.id === order.userId);
                   const service = services?.find(s => s.id === order.serviceId);
                   const provider = workers?.find(w => w.id === order.providerId);
@@ -509,7 +509,7 @@ export default function OrdersPage() {
                       <TableCell>
                         <Typography>{service?.name}</Typography>
                         <Typography variant="caption" color="text.secondary">
-                          {service?.type}
+                          {order?.store && order?.store?.length > 0 ? "خدمات توصيل" : "خدمات عمالة"}
                         </Typography>
                       </TableCell>
                       <TableCell>

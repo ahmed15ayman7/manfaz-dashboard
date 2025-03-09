@@ -86,7 +86,7 @@ export default function LocationsPage() {
     queryKey: ['locations'],
     queryFn: async () => {
       const response = await axios.get(API_ENDPOINTS.locations.getAll({}));
-      return response.data;
+      return response.data.data;
     },
   });
 
@@ -94,15 +94,15 @@ export default function LocationsPage() {
     queryKey: ['users'],
     queryFn: async () => {
       const response = await axios.get(API_ENDPOINTS.users.getAll({}));
-      return response.data;
+      return response.data.data;
     },
   });
 
   // إضافة موقع جديد
   const addLocationMutation = useMutation({
     mutationFn: async (location: typeof locationData) => {
-      const response = await axios.post(API_ENDPOINTS.locations.create({}), location);
-      return response.data;
+      const response = await axios.post(API_ENDPOINTS.locations.create(location.userId, location));
+      return response.data.data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['locations'] });
@@ -114,7 +114,7 @@ export default function LocationsPage() {
   const updateLocationMutation = useMutation({
     mutationFn: async ({ id, data }: { id: string; data: typeof locationData }) => {
       const response = await axios.put(API_ENDPOINTS.locations.update(id, {}), data);
-      return response.data;
+      return response.data.data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['locations'] });
@@ -126,7 +126,7 @@ export default function LocationsPage() {
   const deleteLocationMutation = useMutation({
     mutationFn: async (id: string) => {
       const response = await axios.delete(API_ENDPOINTS.locations.delete(id, {}));
-      return response.data;
+      return response.data.data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['locations'] });
@@ -206,7 +206,7 @@ export default function LocationsPage() {
   const filteredLocations = locations?.filter((location: UserLocation) => {
     const user = users?.find((u: User) => u.id === location.userId);
     const searchLower = searchQuery.toLowerCase();
-    
+
     return (
       user?.name.toLowerCase().includes(searchLower) ||
       location.name.toLowerCase().includes(searchLower) ||

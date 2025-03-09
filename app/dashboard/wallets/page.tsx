@@ -66,7 +66,7 @@ export default function WalletsPage() {
     queryKey: ['users'],
     queryFn: async () => {
       const response = await axios.get(API_ENDPOINTS.users.getAll({}));
-      return response.data;
+      return response.data.data;
     },
   });
 
@@ -74,7 +74,7 @@ export default function WalletsPage() {
   const addTransactionMutation = useMutation({
     mutationFn: async (transaction: typeof transactionData) => {
       const response = await axios.post(API_ENDPOINTS.wallets.transactions.create(transaction.walletId, {}), transaction);
-      return response.data;
+      return response.data.data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['users'] });
@@ -86,7 +86,7 @@ export default function WalletsPage() {
   const updateTransactionMutation = useMutation({
     mutationFn: async ({ id, data }: { id: string; data: typeof transactionData }) => {
       const response = await axios.put(API_ENDPOINTS.wallets.transactions.update(data.walletId, id, {}), data);
-      return response.data;
+      return response.data.data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['users'] });
@@ -98,7 +98,7 @@ export default function WalletsPage() {
   const deleteTransactionMutation = useMutation({
     mutationFn: async ({ walletId, transactionId }: { walletId: string; transactionId: string }) => {
       const response = await axios.delete(API_ENDPOINTS.wallets.transactions.delete(walletId, transactionId, {}));
-      return response.data;
+      return response.data.data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['users'] });

@@ -26,12 +26,9 @@ const handler = NextAuth({
             role: credentials?.role,
           });
           const user = response.data;
-          console.log("user", user);
           if (user) {
-            if (user) {
-              authService.setTokens(user.accessToken, user.refreshToken);
-              Cookies.set('authToken', user.accessToken, { expires: 7 }); // تخزين الكوكيز لمدة 7 أيام
-            }
+            authService.setTokens(user.accessToken, user.refreshToken);
+
             return {
               id: user.data.id,
               name: user.data.name,

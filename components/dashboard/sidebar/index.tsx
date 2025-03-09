@@ -27,6 +27,12 @@ import {
   IconGift,
   IconMapPin,
   IconX,
+  IconUsersGroup,
+  IconCalendar,
+  IconStar,
+  IconDiscount,
+  IconTicket,
+  IconGiftCard
 } from '@tabler/icons-react';
 
 interface MenuItem {
@@ -52,6 +58,12 @@ const menuItems: MenuItem[] = [
     path: '/dashboard/users',
     icon: IconUsers,
     permissions: ['viewCustomers'],
+  },
+  {
+    title: 'الموظفين',
+    path: '/dashboard/employees',
+    icon: IconUsersGroup,
+    permissions: ['viewEmployees'],
   },
   {
     title: 'التصنيفات',
@@ -95,18 +107,56 @@ const menuItems: MenuItem[] = [
     icon: IconBuilding,
     permissions: ['viewStores'],
   },
-  {
-    title: 'المكافآت',
-    path: '/dashboard/rewards',
-    icon: IconGift,
-    permissions: ['viewOffers'],
-  },
+
   {
     title: 'المواقع',
     path: '/dashboard/locations',
     icon: IconMapPin,
     permissions: ['viewLocations'],
   },
+  {
+    title: 'المواعيد',
+    path: '/dashboard/schedules',
+    icon: IconCalendar,
+    permissions: ['viewSchedules'],
+  },
+  {
+    title: 'التقييمات',
+    path: '/dashboard/reviews',
+    icon: IconStar,
+    permissions: ['viewReviews'],
+  },
+  {
+    title: 'المدفوعات',
+    path: '/dashboard/payments',
+    icon: IconWallet,
+    permissions: ['viewPayments'],
+  },
+  {
+    title: 'الكوبونات',
+    path: '/dashboard/coupons',
+    icon: IconTicket,
+    permissions: ['viewCoupons'],
+  },
+  {
+    title: 'الخصومات',
+    path: '/dashboard/discounts',
+    icon: IconDiscount,
+    permissions: ['viewDiscounts'],
+  },
+  {
+    title: 'البطاقات',
+    path: '/dashboard/gift-cards',
+    icon: IconGiftCard,
+    permissions: ['viewGiftCards'],
+  },
+  {
+    title: 'المكافآت',
+    path: '/dashboard/rewards',
+    icon: IconGift,
+    permissions: ['viewRewards'],
+  },
+
 ];
 
 export function Sidebar({ isOpen, onClose }: SidebarProps) {

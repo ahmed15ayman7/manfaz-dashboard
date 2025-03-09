@@ -135,6 +135,7 @@ export interface Store {
     discounts: Discount[]; // الخصومات
     giftCards: GiftCard[]; // بطاقات الهدايا
     rewards: Reward[]; // المكافآت
+    OrdersStore: OrdersStore[];
 }
 export interface Order {
     id: string;
@@ -158,9 +159,25 @@ export interface Order {
     paymentStatus: PaymentStatus;
     createdAt?: Date;
     updatedAt?: Date;
-    storeId?: string;
-    store?: Store;
     scheduleOrder?: ScheduleOrder
+    store?: OrdersStore[];
+}
+export interface ProductsOrder {
+    id: string;
+    orderId: string;
+    order: Order;
+    productId: string;
+    product: Product;
+    quantity: number;
+}
+export interface OrdersStore {
+    id: string;
+    orderId: string;
+    order: Order;
+    storeId: string;
+    store: Store;
+
+    products: ProductsOrder[]
 }
 export type OrderStatus = "pending" | "in_progress" | "completed" | "canceled";
 
@@ -493,6 +510,49 @@ export interface EmployeePermissions {
     manageSettings: boolean;
     viewAuditLogs: boolean;
     manageBackups: boolean;
+
+    // المكافآت
+    viewRewards: boolean;
+    createRewards: boolean;
+    updateRewards: boolean;
+    deleteRewards: boolean;
+
+    // المواعيد
+    viewSchedules: boolean;
+    createSchedules: boolean;
+    updateSchedules: boolean;
+    deleteSchedules: boolean;
+
+    // التقييمات
+    viewReviews: boolean;
+    createReviews: boolean;
+    updateReviews: boolean;
+    deleteReviews: boolean;
+
+    // المدفوعات
+    viewPayments: boolean;
+    createPayments: boolean;
+    updatePayments: boolean;
+    deletePayments: boolean;
+
+    // الكوبونات
+    viewCoupons: boolean;
+    createCoupons: boolean;
+    updateCoupons: boolean;
+    deleteCoupons: boolean;
+
+    // الخصومات
+    viewDiscounts: boolean;
+    createDiscounts: boolean;
+    updateDiscounts: boolean;
+    deleteDiscounts: boolean;
+
+    // البطاقات
+    viewGiftCards: boolean;
+    createGiftCards: boolean;
+    updateGiftCards: boolean;
+    deleteGiftCards: boolean;
+
 
 }
 

@@ -64,7 +64,7 @@ import { ActionButton } from '@/components/common/ActionButton';
 import { formatDate, formatNumber } from '@/lib/utils';
 
 function UsersPage() {
-  const [page, setPage] = useState(1);
+  const [page, setPage] = useState(0);
   const [limit, setLimit] = useState(10);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [searchQuery, setSearchQuery] = useState('');
@@ -95,7 +95,7 @@ function UsersPage() {
         page: page.toString(),
         limit: limit.toString()
       }));
-      return response.data;
+      return response.data.data;
     },
   });
 

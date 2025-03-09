@@ -64,14 +64,14 @@ export default function CategoriesPage() {
     queryKey: ['categories'],
     queryFn: async () => {
       const response = await axios.get(API_ENDPOINTS.categories.getAll({}));
-      return response.data;
+      return response.data.data;
     },
   });
 
   const addCategoryMutation = useMutation({
     mutationFn: async (category: typeof categoryData) => {
       const response = await axios.post(API_ENDPOINTS.categories.create({}), category);
-      return response.data;
+      return response.data.data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['categories'] });
@@ -82,7 +82,7 @@ export default function CategoriesPage() {
   const updateCategoryMutation = useMutation({
     mutationFn: async ({ id, data }: { id: string; data: typeof categoryData }) => {
       const response = await axios.put(API_ENDPOINTS.categories.update(id, {}), data);
-      return response.data;
+      return response.data.data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['categories'] });
@@ -93,7 +93,7 @@ export default function CategoriesPage() {
   const deleteCategoryMutation = useMutation({
     mutationFn: async (id: string) => {
       const response = await axios.delete(API_ENDPOINTS.categories.delete(id, {}));
-      return response.data;
+      return response.data.data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['categories'] });

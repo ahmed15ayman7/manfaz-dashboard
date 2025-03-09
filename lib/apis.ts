@@ -160,9 +160,59 @@ const API_ENDPOINTS = {
   },
   locations: {
     getAll: (params: Record<string, any>, isBaseUrl: boolean = true) => appendQueryParams('/locations', params, isBaseUrl),
-    create: (params: Record<string, any>, isBaseUrl: boolean = true) => appendQueryParams('/locations', params, isBaseUrl),
+    getAllUser: (userId: string, params: Record<string, any>, isBaseUrl: boolean = true) => appendQueryParams(`/locations/users/${userId}`, params, isBaseUrl),
+    create: (userId: string, params: Record<string, any>, isBaseUrl: boolean = true) => appendQueryParams(`/locations/users/${userId}`, params, isBaseUrl),
     update: (id: string, params: Record<string, any>, isBaseUrl: boolean = true) => appendQueryParams(`/locations/${id}`, params, isBaseUrl),
     delete: (id: string, params: Record<string, any>, isBaseUrl: boolean = true) => appendQueryParams(`/locations/${id}`, params, isBaseUrl),
+    setDefault: (id: string, params: Record<string, any>, isBaseUrl: boolean = true) => appendQueryParams(`/locations/${id}/set-default`, params, isBaseUrl),
+  },
+  workerSchedules: {
+    getAll: (params: Record<string, any>, isBaseUrl: boolean = true) => appendQueryParams('/worker-schedules', params, isBaseUrl),
+    create: (params: Record<string, any>, isBaseUrl: boolean = true) => appendQueryParams('/worker-schedules', params, isBaseUrl),
+    update: (id: string, params: Record<string, any>, isBaseUrl: boolean = true) => appendQueryParams(`/worker-schedules/${id}`, params, isBaseUrl),
+    delete: (id: string, params: Record<string, any>, isBaseUrl: boolean = true) => appendQueryParams(`/worker-schedules/${id}`, params, isBaseUrl),
+  },
+  workerReviews: {
+    getAll: (params: Record<string, any>, isBaseUrl: boolean = true) => appendQueryParams('/worker-reviews', params, isBaseUrl),
+    create: (params: Record<string, any>, isBaseUrl: boolean = true) => appendQueryParams('/worker-reviews', params, isBaseUrl),
+    update: (id: string, params: Record<string, any>, isBaseUrl: boolean = true) => appendQueryParams(`/worker-reviews/${id}`, params, isBaseUrl),
+    delete: (id: string, params: Record<string, any>, isBaseUrl: boolean = true) => appendQueryParams(`/worker-reviews/${id}`, params, isBaseUrl),
+  },
+  workerPayments: {
+    getAll: (params: Record<string, any>, isBaseUrl: boolean = true) => appendQueryParams('/worker-payments', params, isBaseUrl),
+    create: (params: Record<string, any>, isBaseUrl: boolean = true) => appendQueryParams('/worker-payments', params, isBaseUrl),
+    update: (id: string, params: Record<string, any>, isBaseUrl: boolean = true) => appendQueryParams(`/worker-payments/${id}`, params, isBaseUrl),
+    delete: (id: string, params: Record<string, any>, isBaseUrl: boolean = true) => appendQueryParams(`/worker-payments/${id}`, params, isBaseUrl),
+  },
+  workerCoupons: {
+    getAll: (params: Record<string, any>, isBaseUrl: boolean = true) => appendQueryParams('/worker-coupons', params, isBaseUrl),
+    create: (params: Record<string, any>, isBaseUrl: boolean = true) => appendQueryParams('/worker-coupons', params, isBaseUrl),
+    update: (id: string, params: Record<string, any>, isBaseUrl: boolean = true) => appendQueryParams(`/worker-coupons/${id}`, params, isBaseUrl),
+    delete: (id: string, params: Record<string, any>, isBaseUrl: boolean = true) => appendQueryParams(`/worker-coupons/${id}`, params, isBaseUrl),
+  },
+  workerDiscounts: {
+    getAll: (params: Record<string, any>, isBaseUrl: boolean = true) => appendQueryParams('/worker-discounts', params, isBaseUrl),
+    create: (params: Record<string, any>, isBaseUrl: boolean = true) => appendQueryParams('/worker-discounts', params, isBaseUrl),
+    update: (id: string, params: Record<string, any>, isBaseUrl: boolean = true) => appendQueryParams(`/worker-discounts/${id}`, params, isBaseUrl),
+    delete: (id: string, params: Record<string, any>, isBaseUrl: boolean = true) => appendQueryParams(`/worker-discounts/${id}`, params, isBaseUrl),
+  },
+  workerGiftCards: {
+    getAll: (params: Record<string, any>, isBaseUrl: boolean = true) => appendQueryParams('/worker-gift-cards', params, isBaseUrl),
+    create: (params: Record<string, any>, isBaseUrl: boolean = true) => appendQueryParams('/worker-gift-cards', params, isBaseUrl),
+    update: (id: string, params: Record<string, any>, isBaseUrl: boolean = true) => appendQueryParams(`/worker-gift-cards/${id}`, params, isBaseUrl),
+    delete: (id: string, params: Record<string, any>, isBaseUrl: boolean = true) => appendQueryParams(`/worker-gift-cards/${id}`, params, isBaseUrl),
+  },
+  workerRewards: {
+    getAll: (params: Record<string, any>, isBaseUrl: boolean = true) => appendQueryParams('/worker-rewards', params, isBaseUrl),
+    create: (params: Record<string, any>, isBaseUrl: boolean = true) => appendQueryParams('/worker-rewards', params, isBaseUrl),
+    update: (id: string, params: Record<string, any>, isBaseUrl: boolean = true) => appendQueryParams(`/worker-rewards/${id}`, params, isBaseUrl),
+    delete: (id: string, params: Record<string, any>, isBaseUrl: boolean = true) => appendQueryParams(`/worker-rewards/${id}`, params, isBaseUrl),
+  },
+  workerLocations: {
+    getAll: (params: Record<string, any>, isBaseUrl: boolean = true) => appendQueryParams('/worker-locations', params, isBaseUrl),
+    create: (params: Record<string, any>, isBaseUrl: boolean = true) => appendQueryParams('/worker-locations', params, isBaseUrl),
+    update: (id: string, params: Record<string, any>, isBaseUrl: boolean = true) => appendQueryParams(`/worker-locations/${id}`, params, isBaseUrl),
+    delete: (id: string, params: Record<string, any>, isBaseUrl: boolean = true) => appendQueryParams(`/worker-locations/${id}`, params, isBaseUrl),
   },
 };
 

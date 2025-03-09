@@ -23,6 +23,9 @@ export function PermissionGuard({
   const permissions = session?.user?.permissions as EmployeePermissions | undefined;
 
   useEffect(() => {
+    console.log('permissions', permissions);
+    console.log('requiredPermissions', requiredPermissions);
+    console.log('session', session);
     if (!session) {
       router.push('/auth/login');
       return;

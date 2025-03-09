@@ -82,7 +82,7 @@ export default function DriversPage() {
     queryKey: ['drivers'],
     queryFn: async () => {
       const response = await axios.get(API_ENDPOINTS.deliveryDrivers.getAll({}));
-      return response.data;
+      return response.data.data;
     },
   });
 
@@ -90,7 +90,7 @@ export default function DriversPage() {
     queryKey: ['users'],
     queryFn: async () => {
       const response = await axios.get(API_ENDPOINTS.users.getAll({}));
-      return response.data;
+      return response.data.data;
     },
   });
 

@@ -71,14 +71,14 @@ export default function RewardsPage() {
     queryKey: ['stores'],
     queryFn: async () => {
       const response = await axiosInstance.get(API_ENDPOINTS.stores.getAll({}, false));
-      return response.data;
+      return response.data.data;
     },
   });
   const { data: rewards, isLoading, refetch } = useQuery<Reward[]>({
     queryKey: ['rewards'],
     queryFn: async () => {
       const response = await axiosInstance.get(API_ENDPOINTS.stores.rewards.getAll(storeId, {}, false));
-      return response.data;
+      return response.data.data;
     },
     enabled: !!storeId,
   });
@@ -87,7 +87,7 @@ export default function RewardsPage() {
     queryKey: ['users'],
     queryFn: async () => {
       const response = await axiosInstance.get(API_ENDPOINTS.users.getAll({}, false));
-      return response.data;
+      return response.data.data;
     },
   });
 
@@ -95,7 +95,7 @@ export default function RewardsPage() {
   const addRewardMutation = useMutation({
     mutationFn: async (reward: typeof rewardData) => {
       const response = await axiosInstance.post(API_ENDPOINTS.stores.rewards.create({}, false), reward);
-      return response.data;
+      return response.data.data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['rewards'] });
@@ -107,7 +107,7 @@ export default function RewardsPage() {
   const updateRewardMutation = useMutation({
     mutationFn: async ({ id, data }: { id: string; data: typeof rewardData }) => {
       const response = await axiosInstance.put(API_ENDPOINTS.stores.rewards.update(id, {}, false), data);
-      return response.data;
+      return response.data.data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['rewards'] });
@@ -119,7 +119,7 @@ export default function RewardsPage() {
   const deleteRewardMutation = useMutation({
     mutationFn: async (id: string) => {
       const response = await axiosInstance.delete(API_ENDPOINTS.stores.rewards.delete(id, {}, false));
-      return response.data;
+      return response.data.data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['rewards'] });
@@ -232,6 +232,24 @@ export default function RewardsPage() {
           <Typography variant="h5" fontWeight="bold">
             المكافآت والنقاط
           </Typography>
+          <Box sx={{ mb: 4, display: 'flex', alignItems: 'center',gap:"10px" }}>
+          <Select
+            value={storeId}
+            defaultValue="" 
+            onChange={(e: SelectChangeEvent) => {
+              setStoreId(e.target.value);
+              refetch();
+            }}
+          >
+            <MenuItem disabled selected  value="">
+                اختر المتجر
+              </MenuItem>
+            {stores?.map((store: Store) => (
+              <MenuItem key={store.id} value={store.id}>
+                {store.name}
+              </MenuItem>
+            ))}
+          </Select>
           <Button
             variant="contained"
             startIcon={<IconPlus size={20} />}
@@ -239,19 +257,7 @@ export default function RewardsPage() {
           >
             إضافة مكافأة جديدة
           </Button>
-          <Select
-            value={storeId}
-            onChange={(e: SelectChangeEvent) => {
-              setStoreId(e.target.value);
-              refetch();
-            }}
-          >
-            {stores?.map((store: Store) => (
-              <MenuItem key={store.id} value={store.id}>
-                {store.name}
-              </MenuItem>
-            ))}
-          </Select>
+        </Box>
         </Box>
 
 

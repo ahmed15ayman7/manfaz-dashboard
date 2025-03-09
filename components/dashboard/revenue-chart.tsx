@@ -20,7 +20,7 @@ export function RevenueChart() {
     queryKey: ['revenue-chart'],
     queryFn: async () => {
       const response = await axiosInstance.get(API_ENDPOINTS.dashboard.revenue({},false));
-      return response.data;
+      return response.data.data;
     },
   });
 

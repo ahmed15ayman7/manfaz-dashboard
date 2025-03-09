@@ -32,8 +32,9 @@ class AuthService {
   public setTokens(accessToken: string, refreshToken: string) {
     this.accessToken = accessToken;
     this.refresh_token = refreshToken;
-    Cookies.set('accessToken', accessToken);
-    Cookies.set('refreshToken', refreshToken, { expires: 7 });
+    Cookies.set('accessToken', accessToken, { path: '/', secure: true, sameSite: 'Lax' });
+    Cookies.set('refreshToken', refreshToken, { path: '/', secure: true, sameSite: 'Lax', expires: 7 });
+    console.log("Cookies after setting:", Cookies.get('accessToken'), Cookies.get('refreshToken'));
     this.startRefreshTokenTimer();
   }
 

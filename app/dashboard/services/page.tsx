@@ -103,7 +103,7 @@ export default function ServicesPage() {
     queryKey: ['services'],
     queryFn: async () => {
       const response = await axios.get(API_ENDPOINTS.services.getAll({}));
-      return response.data;
+      return response.data.data;
     },
   });
 
@@ -111,7 +111,7 @@ export default function ServicesPage() {
     queryKey: ['categories'],
     queryFn: async () => {
       const response = await axios.get(API_ENDPOINTS.categories.getAll({}));
-      return response.data;
+      return response.data.data;
     },
   });
 
@@ -119,7 +119,7 @@ export default function ServicesPage() {
   const addServiceMutation = useMutation({
     mutationFn: async (service: typeof serviceData) => {
       const response = await axios.post(API_ENDPOINTS.services.create({}), service);
-      return response.data;
+      return response.data.data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['services'] });
@@ -131,7 +131,7 @@ export default function ServicesPage() {
   const updateServiceMutation = useMutation({
     mutationFn: async ({ id, data }: { id: string; data: typeof serviceData }) => {
       const response = await axios.put(API_ENDPOINTS.services.update(id, {}), data);
-      return response.data;
+      return response.data.data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['services'] });
@@ -143,7 +143,7 @@ export default function ServicesPage() {
   const deleteServiceMutation = useMutation({
     mutationFn: async (id: string) => {
       const response = await axios.delete(API_ENDPOINTS.services.delete(id, {}));
-      return response.data;
+      return response.data.data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['services'] });

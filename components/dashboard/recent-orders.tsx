@@ -19,7 +19,7 @@ export function RecentOrders() {
     queryKey: ['recent-orders'],
     queryFn: async () => {
       const response = await axiosInstance.get(API_ENDPOINTS.orders.getAll({ limit: 5 }, false));
-      return response.data;
+      return response.data.data?.orders;
     },
   });
 

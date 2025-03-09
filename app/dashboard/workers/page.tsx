@@ -83,7 +83,7 @@ export default function WorkersPage() {
     queryKey: ['workers'],
     queryFn: async () => {
       const response = await axios.get(API_ENDPOINTS.workers.getAll({}));
-      return response.data;
+      return response.data.data;
     },
   });
 
@@ -91,7 +91,7 @@ export default function WorkersPage() {
     queryKey: ['users'],
     queryFn: async () => {
       const response = await axios.get(API_ENDPOINTS.users.getAll({}));
-      return response.data;
+      return response.data.data;
     },
   });
 

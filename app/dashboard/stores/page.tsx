@@ -88,7 +88,7 @@ export default function StoresPage() {
     queryKey: ['stores'],
     queryFn: async () => {
       const response = await axios.get(API_ENDPOINTS.stores.getAll({}));
-      return response.data;
+      return response.data.data;
     },
   });
 
@@ -96,7 +96,7 @@ export default function StoresPage() {
     queryKey: ['categories'],
     queryFn: async () => {
       const response = await axios.get(API_ENDPOINTS.categories.getAll({}));
-      return response.data;
+      return response.data.data;
     },
   });
 
@@ -104,7 +104,7 @@ export default function StoresPage() {
     queryKey: ['users'],
     queryFn: async () => {
       const response = await axios.get(API_ENDPOINTS.users.getAll({}));
-      return response.data;
+      return response.data.data;
     },
   });
 
@@ -112,7 +112,7 @@ export default function StoresPage() {
   const addStoreMutation = useMutation({
     mutationFn: async (store: typeof storeData) => {
       const response = await axios.post(API_ENDPOINTS.stores.create({}), store);
-      return response.data;
+      return response.data.data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['stores'] });
@@ -124,7 +124,7 @@ export default function StoresPage() {
   const updateStoreMutation = useMutation({
     mutationFn: async ({ id, data }: { id: string; data: typeof storeData }) => {
       const response = await axios.put(API_ENDPOINTS.stores.update(id, {}), data);
-      return response.data;
+      return response.data.data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['stores'] });
@@ -136,7 +136,7 @@ export default function StoresPage() {
   const deleteStoreMutation = useMutation({
     mutationFn: async (id: string) => {
       const response = await axios.delete(API_ENDPOINTS.stores.delete(id, {}));
-      return response.data;
+      return response.data.data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['stores'] });
@@ -446,7 +446,7 @@ export default function StoresPage() {
                           <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                             <IconClock size={16} />
                             <Typography variant="body2">
-                              {store.workingHours.map(wh => `${wh.dayOfWeek} ${wh.openTime} - ${wh.closeTime}`).join(', ')}
+                              {store.workingHours.map(wh => `${daysOfWeek[wh.dayOfWeek]} ${wh.openTime} - ${wh.closeTime}`).join(', ')}
                             </Typography>
                           </Box>
                         </Stack>
