@@ -288,6 +288,7 @@ export default function EmployeesPage() {
           </Typography>
           <Stack direction="row" sx={{
             flexDirection: { xs: 'column', md: 'row' },
+            gap: 2,
             justifyContent: { xs: 'center', md: 'flex-start' },
           }} spacing={2}>
             <ExcelExport
