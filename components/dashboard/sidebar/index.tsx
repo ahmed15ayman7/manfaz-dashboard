@@ -177,6 +177,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
   const sidebarContent = (
     <Box
       sx={{
+        overflow:'scroll',
         height: '100%',
         display: 'flex',
         flexDirection: 'column',
