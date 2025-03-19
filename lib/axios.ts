@@ -12,8 +12,8 @@ const axiosInstance = axios.create({
 
 // إضافة التوكن لكل الطلبات
 axiosInstance.interceptors.request.use(
-  (config) => {
-    const token = authService.getAccessToken();
+ async (config) => {
+    const token = await authService.getAccessToken();
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -43,7 +43,7 @@ axiosInstance.interceptors.response.use(
         return axiosInstance(originalRequest);
       } catch (refreshError) {
         // إذا فشل تجديد التوكن، قم بتسجيل الخروج
-        authService.logout();
+        await authService.logout();
         return Promise.reject(refreshError);
       }
     }

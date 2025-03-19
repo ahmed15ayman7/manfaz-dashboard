@@ -71,7 +71,7 @@ export default function RewardsPage() {
     queryKey: ['stores'],
     queryFn: async () => {
       const response = await axiosInstance.get(API_ENDPOINTS.stores.getAll({}, false));
-      return response.data.data;
+      return response.data.data.stores;
     },
   });
   const { data: rewards, isLoading, refetch } = useQuery<Reward[]>({
@@ -87,7 +87,7 @@ export default function RewardsPage() {
     queryKey: ['users'],
     queryFn: async () => {
       const response = await axiosInstance.get(API_ENDPOINTS.users.getAll({}, false));
-      return response.data.data;
+      return response.data.data.users;
     },
   });
 

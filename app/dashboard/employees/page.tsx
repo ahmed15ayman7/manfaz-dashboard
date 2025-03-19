@@ -48,6 +48,7 @@ import { PDFDocument } from '@/components/shared/pdf-document';
 import { Employee, EmployeeRole, EmployeePermissions } from '@/interfaces';
 import PermissionsManager from '@/components/employees/permissions-manager';
 import { PermissionGuard } from '@/components/common/PermissionGuard';
+import axiosInstance from '@/lib/axios';
 interface TabPanelProps {
   children?: React.ReactNode;
   index: number;
@@ -93,7 +94,7 @@ export default function EmployeesPage() {
   const { data: employeesData, isLoading } = useQuery({
     queryKey: ['employees', page, search],
     queryFn: async () => {
-      const response = await axios.get(API_ENDPOINTS.employees.getAll({ page, search }));
+      const response = await axiosInstance.get(API_ENDPOINTS.employees.getAll({ page, search }, false));
       return response.data.data;
     },
   });
@@ -103,8 +104,8 @@ export default function EmployeesPage() {
     queryKey: ['employee-activities', selectedEmployee?.id],
     queryFn: async () => {
       if (!selectedEmployee) return null;
-      const response = await axios.get(
-        API_ENDPOINTS.employeeActivities.getByEmployee(selectedEmployee.id, {})
+      const response = await axiosInstance.get(
+        API_ENDPOINTS.employeeActivities.getByEmployee(selectedEmployee.id, {}, false)
       );
       return response.data.data;
     },
@@ -114,7 +115,7 @@ export default function EmployeesPage() {
   // إضافة موظف جديد
   const addMutation = useMutation({
     mutationFn: async (data: any) => {
-      const response = await axios.post(API_ENDPOINTS.employees.create({}), data);
+      const response = await axiosInstance.post(API_ENDPOINTS.employees.create({}, false), data);
       return response.data.data;
     },
     onSuccess: () => {
@@ -126,8 +127,8 @@ export default function EmployeesPage() {
   // تحديث موظف
   const updateMutation = useMutation({
     mutationFn: async (data: any) => {
-      const response = await axios.put(
-        API_ENDPOINTS.employees.update(selectedEmployee!.id, {}),
+      const response = await axiosInstance.put(
+        API_ENDPOINTS.employees.update(selectedEmployee!.id, {}, false),
         data
       );
       return response.data.data;

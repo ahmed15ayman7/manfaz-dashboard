@@ -1,11 +1,9 @@
 import NextAuth from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
-import axios from "axios";
 import axiosInstance from "@/lib/axios";
 import API_ENDPOINTS from "@/lib/apis";
 import { Employee } from "@/interfaces";
 import authService from "@/lib/services/auth.service";
-import Cookies from 'js-cookie';
 
 const handler = NextAuth({
   providers: [
@@ -27,7 +25,7 @@ const handler = NextAuth({
           });
           const user = response.data;
           if (user) {
-            authService.setTokens(user.accessToken, user.refreshToken);
+            await authService.setTokens(user.accessToken, user.refreshToken);
 
             return {
               id: user.data.id,
