@@ -43,7 +43,7 @@ export default function DashboardPage() {
     queryKey: ['dashboard-stats'],
     queryFn: async () => {
       const response = await axiosInstance.get(API_ENDPOINTS.dashboard.getStats({}));
-      return response.data;
+      return response.data.data;
     },
   });
 
