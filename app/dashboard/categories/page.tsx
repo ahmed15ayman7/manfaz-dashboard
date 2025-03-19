@@ -110,7 +110,7 @@ export default function CategoriesPage() {
     { header: 'عدد المتاجر', key: 'storesCount', width: 15 },
   ];
 
-  const excelData = categories?.map(category => ({
+  const excelData = categories?.categories?.map(category => ({
     name: category.name,
     subName: category.subName || '',
     type: category.type === 'service' ? 'خدمة' : 'توصيل',
@@ -182,7 +182,7 @@ export default function CategoriesPage() {
     setPage(0);
   };
 
-  const filteredCategories = categories?.filter((category) =>
+  const filteredCategories = categories?.categories?.filter((category) =>
     category.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
