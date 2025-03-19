@@ -34,6 +34,7 @@ import {
   IconTicket,
   IconGiftCard
 } from '@tabler/icons-react';
+import { useEffect, useState } from 'react';
 
 interface MenuItem {
   title: string;
@@ -161,19 +162,24 @@ const menuItems: MenuItem[] = [
 
 export function Sidebar({ isOpen, onClose }: SidebarProps) {
   const pathname = usePathname();
-  const { data: session } = useSession();
-  const permissions = session?.user?.permissions as EmployeePermissions | undefined;
+  const { data: session, status } = useSession();
+  let [permissions, setPermissions] = useState<EmployeePermissions | undefined>(session?.user?.permissions)
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
 
-  const filteredMenuItems = menuItems.filter(item => {
-    if (!item.permissions) return true;
-    if (!permissions) return false;
-    return item.permissions.some(permission => permissions[permission]);
-  });
-
+  const [filteredMenuItems, setFilteredMenuItems] = useState(menuItems);
+  useEffect(() => {
+    status !== "loading" && setPermissions(session?.user?.permissions)
+    status !== "loading" && setFilteredMenuItems(menuItems.filter(item => {
+      if (!item.permissions) return true;
+      if (!permissions) return false;
+      return item.permissions.some(permission => session?.user?.permissions[permission]);
+    }))
+  }, [session])
   const sidebarWidth = 280;
-
+  if (status === "loading") {
+    return null
+  }
   const sidebarContent = (
     <Box
       sx={{
