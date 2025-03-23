@@ -19,6 +19,8 @@ import axios from 'axios';
 import { Order } from '@/interfaces';
 import { format } from 'date-fns';
 import { ar } from 'date-fns/locale';
+import axiosInstance from '@/lib/axios';
+import API_ENDPOINTS from '@/lib/apis';
 
 interface OrdersListProps {
   userId: string;
@@ -28,8 +30,8 @@ export function OrdersList({ userId }: OrdersListProps) {
   const { data: orders = [] } = useQuery<Order[]>({
     queryKey: ['user-orders', userId],
     queryFn: async () => {
-      const response = await axios.get(`/api/users/${userId}/orders`);
-      return response.data;
+      const response = await axiosInstance.get(API_ENDPOINTS.orders.getAll({ userId }, false));
+      return response.data.data?.orders;
     },
   });
 

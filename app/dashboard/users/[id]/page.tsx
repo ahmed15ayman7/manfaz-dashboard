@@ -35,6 +35,8 @@ import { ReviewsList } from '@/components/users/reviews-list';
 import { UserStats } from '@/components/users/user-stats';
 import { EditUserDialog } from '@/components/users/edit-user-dialog';
 import { toast } from 'react-toastify';
+import API_ENDPOINTS from '@/lib/apis';
+import axiosInstance from '@/lib/axios';
 
 export default function UserDetailsPage() {
   const params = useParams();
@@ -45,8 +47,8 @@ export default function UserDetailsPage() {
   const { data: user, refetch } = useQuery<User>({
     queryKey: ['user', params.id],
     queryFn: async () => {
-      const response = await axios.get(`/api/users/${params.id}`);
-      return response.data;
+      const response = await axiosInstance.get(API_ENDPOINTS.users.getById(params.id as string, {}, false));
+      return response.data.data;
     },
   });
 

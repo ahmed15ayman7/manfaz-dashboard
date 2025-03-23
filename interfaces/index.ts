@@ -10,10 +10,10 @@ export interface User {
     verificationCode?: number;
     createdAt?: Date;
     updatedAt?: Date;
-    workers: Worker[];
+    Worker: Worker[];
     deliveryDrivers: DeliveryDriver[];
-    orders: Order[];
-    wallet?: Wallet;
+    Order: Order[];
+    Wallet?: Wallet;
     locations: UserLocation[];
 }
 

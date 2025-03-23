@@ -62,7 +62,7 @@ import { PDFDocument, PrintButton } from '@/components/shared/pdf-document';
 import { PermissionGuard } from '@/components/common/PermissionGuard';
 import { ActionButton } from '@/components/common/ActionButton';
 import { formatDate, formatNumber } from '@/lib/utils';
-
+import { useRouter } from 'next/navigation';
 function UsersPage() {
   const [page, setPage] = useState(0);
   const [limit, setLimit] = useState(10);
@@ -83,7 +83,7 @@ function UsersPage() {
     imageUrl: '',
     role: 'user',
   });
-
+ let router = useRouter();
   const queryClient = useQueryClient();
 
   // استدعاء بيانات المستخدمين مع البحث والتنقل
@@ -181,8 +181,8 @@ function UsersPage() {
     phone: user.phone,
     role: user.role === 'user' ? 'مستخدم' :
       user.role === 'store' ? 'متجر' : 'مقدم خدمة',
-    ordersCount: user.orders?.length || 0,
-    balance: user.wallet?.balance || 0,
+    ordersCount: user.Order?.length || 0,
+    balance: user.Wallet?.balance || 0,
     createdAt: user.createdAt ? formatDate(user.createdAt) : '',
   })) || [];
 
@@ -425,7 +425,7 @@ function UsersPage() {
                   <TableRow key={user.id}>
                     <TableCell>
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                        <Avatar src={user.imageUrl} alt={user.name}>
+                        <Avatar src={user.imageUrl} alt={user.name} className='cursor-pointer' onClick={() => router.push(`/dashboard/users/${user.id}`)}>
                           {user.name.charAt(0)}
                         </Avatar>
                         <Box>
@@ -468,13 +468,13 @@ function UsersPage() {
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                           <IconShoppingCart size={16} />
                           <Typography variant="body2">
-                            {user.orders?.length || 0} طلب
+                            {user.Order?.length || 0} طلب
                           </Typography>
                         </Box>
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                           <IconWallet size={16} />
                           <Typography variant="body2">
-                            {formatNumber(user.wallet?.balance || 0, 'currency')}
+                            {formatNumber(user.Wallet?.balance || 0, 'currency')}
                           </Typography>
                         </Box>
                       </Stack>
@@ -646,8 +646,8 @@ function UsersPage() {
                   {
                     title: 'إحصائيات النشاط',
                     content: `
-                      عدد الطلبات: ${selectedUser.orders?.length || 0}
-                      رصيد المحفظة: ${formatNumber(selectedUser.wallet?.balance || 0, 'currency')}
+                      عدد الطلبات: ${selectedUser.Order?.length || 0}
+                      رصيد المحفظة: ${formatNumber(selectedUser.Wallet?.balance || 0, 'currency')}
                       عدد العناوين المسجلة: ${selectedUser.locations?.length || 0}
                     `
                   }

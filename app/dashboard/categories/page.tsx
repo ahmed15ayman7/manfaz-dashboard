@@ -64,7 +64,7 @@ export default function CategoriesPage() {
     queryKey: ['categories'],
     queryFn: async () => {
       const response = await axios.get(API_ENDPOINTS.categories.getAll({}));
-      return response.data.data;
+      return response.data.data.categories;
     },
   });
 
