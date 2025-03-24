@@ -158,21 +158,21 @@ export default function WalletsPage() {
 
   // جمع جميع المعاملات من المحافظ
   const allTransactions = users?.reduce<Transaction[]>((acc: Transaction[], user: User) => {
-    if (user.wallet?.transactions) {
-      return [...acc, ...user.wallet.transactions];
+    if (user.Wallet?.[0]?.transactions) {
+      return [...acc, ...user.Wallet?.[0]?.transactions];
     }
     return acc;
   }, []);
 
   // تصفية المعاملات حسب البحث
   const filteredTransactions = allTransactions?.filter((transaction: Transaction) => {
-    const user = users?.find((u: User) => u.wallet?.id === transaction.walletId);
+    const user = users?.find((u: User) => u.Wallet?.[0]?.id === transaction.walletId);
     return user?.name.toLowerCase().includes(searchQuery.toLowerCase());
   });
 
   // حساب الإحصائيات
   const stats = {
-    totalBalance: users?.reduce((sum: number, user: User) => sum + (user.wallet?.balance || 0), 0) || 0,
+    totalBalance: users?.reduce((sum: number, user: User) => sum + (user.Wallet?.[0]?.balance || 0), 0) || 0,
     totalTransactions: filteredTransactions?.length || 0,
     totalDeposits: filteredTransactions?.filter((t: Transaction) => t.type === 'deposit').reduce((sum: number, t: Transaction) => sum + t.amount, 0) || 0,
     totalWithdrawals: filteredTransactions?.filter((t: Transaction) => t.type === 'withdrawal').reduce((sum: number, t: Transaction) => sum + t.amount, 0) || 0,
@@ -305,7 +305,7 @@ export default function WalletsPage() {
               {filteredTransactions
                 ?.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                 .map((transaction) => {
-                  const user = users?.find(u => u.wallet?.id === transaction.walletId);
+                  const user = users?.find(u => u.Wallet?.[0]?.id === transaction.walletId);
                   return (
                     <TableRow key={transaction.id}>
                       <TableCell>
@@ -411,8 +411,8 @@ export default function WalletsPage() {
                   onChange={(e: SelectChangeEvent) => setTransactionData({ ...transactionData, walletId: e.target.value })}
                 >
                   {users?.map((user) => (
-                    user.wallet && (
-                      <MenuItem key={user.wallet.id} value={user.wallet.id}>
+                    user.Wallet && (
+                      <MenuItem key={user.Wallet?.[0]?.id} value={user.Wallet?.[0]?.id}>
                         {user.name}
                       </MenuItem>
                     )

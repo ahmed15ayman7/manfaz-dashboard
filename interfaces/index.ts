@@ -13,7 +13,7 @@ export interface User {
     Worker: Worker[];
     deliveryDrivers: DeliveryDriver[];
     Order: Order[];
-    Wallet?: Wallet;
+    Wallet?: Wallet[];
     locations: UserLocation[];
 }
 

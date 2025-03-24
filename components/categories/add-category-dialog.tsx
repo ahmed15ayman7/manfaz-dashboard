@@ -18,16 +18,16 @@ import { useForm, Controller } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
 import { toast } from 'react-toastify';
-import axios from 'axios';
+import axiosInstance from '@/lib/axios';
 import { ImageUpload } from '@/components/shared/image-upload';
-
+import API_ENDPOINTS from '@/lib/apis'
 const categorySchema = z.object({
   name: z.string().min(3, 'اسم التصنيف يجب أن يكون 3 أحرف على الأقل'),
   subName: z.string().optional(),
   description: z.string().min(10, 'الوصف يجب أن يكون 10 أحرف على الأقل'),
   type: z.enum(['service', 'delivery']),
   status: z.enum(['active', 'inactive']),
-  imageUrl: z.string().min(1, 'الصورة مطلوبة'),
+  imageUrl: z.string().optional(),
   info: z.string().optional(),
   price: z.number().optional(),
   sortOrder: z.number().min(0),
@@ -64,7 +64,7 @@ export function AddCategoryDialog({ open, onClose, onSuccess }: AddCategoryDialo
 
   const onSubmit = async (data: CategoryFormData) => {
     try {
-      await axios.post('/api/categories', data);
+      await axiosInstance.post(API_ENDPOINTS.categories.create({},false), data);
       toast.success('تم إضافة التصنيف بنجاح');
       onSuccess();
       handleClose();
