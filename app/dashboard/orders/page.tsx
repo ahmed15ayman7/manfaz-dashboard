@@ -97,7 +97,7 @@ const getPaymentStatusLabel = (status: Order['paymentStatus']) => {
 };
 
 export default function OrdersPage() {
-  const [page, setPage] = useState(0);
+  const [page, setPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [searchQuery, setSearchQuery] = useState('');
   const [openDialog, setOpenDialog] = useState(false);
@@ -156,7 +156,7 @@ export default function OrdersPage() {
   const { data: orders, isLoading, refetch } = useQuery<{ orders: Order[] }>({
     queryKey: ['orders'],
     queryFn: async () => {
-      const response = await axios.get(API_ENDPOINTS.orders.getAll({ limit: rowsPerPage, page, search: searchQuery }));
+      const response = await axios.get(API_ENDPOINTS.orders.getAll({ role: "admin", limit: rowsPerPage, page, search: searchQuery }));
       return response.data.data;
     },
   });
@@ -492,7 +492,7 @@ export default function OrdersPage() {
             </TableHead>
             <TableBody>
               {(orders?.orders || [])
-                .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                // .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                 .map((order: Order) => {
                   const user = users?.find(u => u.id === order.userId);
                   const service = services?.find(s => s.id === order.serviceId);

@@ -18,7 +18,7 @@ export function RecentOrders() {
   const { data: orders = [] } = useQuery<Order[]>({
     queryKey: ['recent-orders'],
     queryFn: async () => {
-      const response = await axiosInstance.get(API_ENDPOINTS.orders.getAll({ limit: 5 }, false));
+      const response = await axiosInstance.get(API_ENDPOINTS.orders.getAll({ role:"admin",limit: 5 }, false));
       return response.data.data?.orders;
     },
   });
