@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Box,
   Typography,
@@ -79,13 +79,16 @@ export default function WorkersPage() {
   const queryClient = useQueryClient();
 
   // استدعاء البيانات
-  const { data: workers, isLoading } = useQuery<Worker[]>({
+  const { data: workers, isLoading, refetch } = useQuery<Worker[]>({
     queryKey: ['workers'],
     queryFn: async () => {
-      const response = await axios.get(API_ENDPOINTS.workers.getAll({}));
+      const response = await axios.get(API_ENDPOINTS.workers.getAll({ limit: rowsPerPage, page, search: searchQuery }));
       return response.data.data;
     },
   });
+  useEffect(() => {
+    refetch();
+  }, [searchQuery, rowsPerPage, page]);
 
   const { data: users } = useQuery<User[]>({
     queryKey: ['users'],
@@ -254,21 +257,21 @@ export default function WorkersPage() {
 
   return (
     <PermissionGuard requiredPermissions={['viewProviders']}>
-    <Box>
+      <Box>
         {/* رأس الصفحة */}
-      <Box sx={{ mb: 4, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <Typography variant="h5" fontWeight="bold">
+        <Box sx={{ mb: 4, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <Typography variant="h5" fontWeight="bold">
             مقدمي الخدمات
-        </Typography>
+          </Typography>
           <ActionButton
             requiredPermissions={['createProviders']}
-          variant="contained"
+            variant="contained"
             startIcon={<IconPlus size={20} />}
             onClick={() => handleOpenDialog()}
-        >
+          >
             إضافة مقدم خدمة
           </ActionButton>
-      </Box>
+        </Box>
 
         {/* الإحصائيات */}
         <Grid container spacing={3} mb={4}>
@@ -318,20 +321,20 @@ export default function WorkersPage() {
           </Grid>
         </Grid>
 
-      {/* قسم البحث */}
-      <Paper sx={{ p: 2, mb: 3 }}>
-        <Grid container spacing={2} alignItems="center">
-          <Grid item xs={12} md={6}>
-            <TextField
-              fullWidth
-              placeholder="البحث عن مقدم خدمة..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              InputProps={{
-                startAdornment: <IconSearch size={20} />,
-              }}
-            />
-          </Grid>
+        {/* قسم البحث */}
+        <Paper sx={{ p: 2, mb: 3 }}>
+          <Grid container spacing={2} alignItems="center">
+            <Grid item xs={12} md={6}>
+              <TextField
+                fullWidth
+                placeholder="البحث عن مقدم خدمة..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                InputProps={{
+                  startAdornment: <IconSearch size={20} />,
+                }}
+              />
+            </Grid>
             <Grid item xs={12} md={6}>
               <Stack direction="row" spacing={2} justifyContent="flex-end">
                 <ExcelExport
@@ -342,48 +345,48 @@ export default function WorkersPage() {
                 />
               </Stack>
             </Grid>
-        </Grid>
-      </Paper>
+          </Grid>
+        </Paper>
 
-      {/* جدول مقدمي الخدمات */}
-      <TableContainer component={Paper}>
-        <Table>
-          <TableHead>
-            <TableRow>
-              <TableCell>مقدم الخدمة</TableCell>
+        {/* جدول مقدمي الخدمات */}
+        <TableContainer component={Paper}>
+          <Table>
+            <TableHead>
+              <TableRow>
+                <TableCell>مقدم الخدمة</TableCell>
                 <TableCell>معلومات الاتصال</TableCell>
-              <TableCell>المهنة</TableCell>
-              <TableCell>التقييم</TableCell>
+                <TableCell>المهنة</TableCell>
+                <TableCell>التقييم</TableCell>
                 <TableCell>النشاط</TableCell>
-              <TableCell>الحالة</TableCell>
-              <TableCell>الإجراءات</TableCell>
-            </TableRow>
-          </TableHead>
-          <TableBody>
+                <TableCell>الحالة</TableCell>
+                <TableCell>الإجراءات</TableCell>
+              </TableRow>
+            </TableHead>
+            <TableBody>
               {(filteredWorkers || [])
                 .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
-              .map((worker) => (
-                <TableRow key={worker.id}>
-                  <TableCell>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+                .map((worker) => (
+                  <TableRow key={worker.id}>
+                    <TableCell>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
                         <Avatar src={worker.user?.imageUrl}>
                           {worker.user?.name?.charAt(0)}
                         </Avatar>
-                      <Box>
+                        <Box>
                           <Typography fontWeight="medium">{worker.user?.name}</Typography>
-                        <Typography variant="caption" color="text.secondary">
+                          <Typography variant="caption" color="text.secondary">
                             {worker.title}
-                        </Typography>
+                          </Typography>
+                        </Box>
                       </Box>
-                    </Box>
-                  </TableCell>
-                  <TableCell>
+                    </TableCell>
+                    <TableCell>
                       <Stack spacing={1}>
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                           <IconPhone size={16} />
                           <Typography variant="body2">{worker.user?.phone}</Typography>
                         </Box>
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                           <IconMail size={16} />
                           <Typography variant="body2">{worker.user?.email}</Typography>
                         </Box>
@@ -395,7 +398,7 @@ export default function WorkersPage() {
                           <Chip
                             key={index}
                             label={skill}
-                        size="small"
+                            size="small"
                             color="primary"
                             variant="outlined"
                           />
@@ -406,10 +409,10 @@ export default function WorkersPage() {
                       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                         <Rating value={worker.rating} readOnly size="small" />
                         <Typography variant="body2">
-                        ({worker.reviewsCount} تقييم)
-                      </Typography>
-                    </Box>
-                  </TableCell>
+                          ({worker.reviewsCount} تقييم)
+                        </Typography>
+                      </Box>
+                    </TableCell>
                     <TableCell>
                       <Stack spacing={1}>
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
@@ -426,14 +429,14 @@ export default function WorkersPage() {
                         </Box>
                       </Stack>
                     </TableCell>
-                  <TableCell>
-                    <Chip
-                      label={worker.isAvailable ? 'متاح' : 'غير متاح'}
+                    <TableCell>
+                      <Chip
+                        label={worker.isAvailable ? 'متاح' : 'غير متاح'}
                         color={worker.isAvailable ? 'success' : 'default'}
-                      size="small"
-                    />
-                  </TableCell>
-                  <TableCell>
+                        size="small"
+                      />
+                    </TableCell>
+                    <TableCell>
                       <Stack direction="row" spacing={1}>
                         <IconButton
                           size="small"
@@ -447,34 +450,34 @@ export default function WorkersPage() {
                           color="primary"
                           onClick={() => handleOpenDialog(worker)}
                         >
-                      <IconEdit size={18} />
-                    </IconButton>
+                          <IconEdit size={18} />
+                        </IconButton>
                         <IconButton
                           size="small"
                           color="error"
                           onClick={() => deleteWorkerMutation.mutate(worker.id!)}
                         >
-                      <IconTrash size={18} />
-                    </IconButton>
+                          <IconTrash size={18} />
+                        </IconButton>
                       </Stack>
-                  </TableCell>
-                </TableRow>
-              ))}
-          </TableBody>
-        </Table>
-        <TablePagination
-          component="div"
-          count={filteredWorkers?.length || 0}
-          page={page}
-          onPageChange={handleChangePage}
-          rowsPerPage={rowsPerPage}
-          onRowsPerPageChange={handleChangeRowsPerPage}
-          labelRowsPerPage="عدد العناصر في الصفحة"
-          labelDisplayedRows={({ from, to, count }) =>
-            `${from}-${to} من ${count !== -1 ? count : `أكثر من ${to}`}`
-          }
-        />
-      </TableContainer>
+                    </TableCell>
+                  </TableRow>
+                ))}
+            </TableBody>
+          </Table>
+          <TablePagination
+            component="div"
+            count={filteredWorkers?.length || 0}
+            page={page}
+            onPageChange={handleChangePage}
+            rowsPerPage={rowsPerPage}
+            onRowsPerPageChange={handleChangeRowsPerPage}
+            labelRowsPerPage="عدد العناصر في الصفحة"
+            labelDisplayedRows={({ from, to, count }) =>
+              `${from}-${to} من ${count !== -1 ? count : `أكثر من ${to}`}`
+            }
+          />
+        </TableContainer>
 
         {/* نموذج إضافة/تعديل مقدم خدمة */}
         <Dialog open={openDialog} onClose={handleCloseDialog} maxWidth="md" fullWidth>
@@ -616,7 +619,7 @@ export default function WorkersPage() {
             />
           )}
         </Dialog>
-    </Box>
+      </Box>
     </PermissionGuard>
   );
 } 

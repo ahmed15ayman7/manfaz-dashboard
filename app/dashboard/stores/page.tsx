@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   Box,
   Typography,
@@ -84,13 +84,16 @@ export default function StoresPage() {
   const queryClient = useQueryClient();
 
   // استدعاء البيانات
-  const { data: stores, isLoading } = useQuery<Store[]>({
+  const { data: stores, isLoading, refetch } = useQuery<Store[]>({
     queryKey: ['stores'],
     queryFn: async () => {
-      const response = await axios.get(API_ENDPOINTS.stores.getAll({}));
+      const response = await axios.get(API_ENDPOINTS.stores.getAll({ limit: rowsPerPage, page, search: searchQuery }));
       return response.data.data.stores;
     },
   });
+  useEffect(() => {
+    refetch();
+  }, [searchQuery, rowsPerPage, page]);
 
   const { data: categories } = useQuery<Category[]>({
     queryKey: ['categories'],
@@ -586,8 +589,8 @@ export default function StoresPage() {
                   </FormControl>
                 </Grid>
                 {Array.from({ length: 7 }).map((_, index) => (
-                  <>
-                    <Grid item xs={12} md={6} key={index}>
+                  <div key={index}>
+                    <Grid item xs={12} md={6} >
                       <TextField
                         fullWidth
                         label={`وقت الفتح ${daysOfWeek[index]}`}
@@ -603,7 +606,7 @@ export default function StoresPage() {
                         onChange={(e) => setStoreData((prev) => ({ ...prev, workingHours: prev.workingHours?.map((wh, i) => i === index ? { ...wh, closeTime: e.target.value } : wh) || [] }))}
                       />
 
-                    </Grid></>))}
+                    </Grid></div>))}
                 <Grid item xs={12} md={6}>
                   <FormControl fullWidth>
                     <InputLabel>الحالة</InputLabel>

@@ -115,42 +115,42 @@ const menuItems: MenuItem[] = [
     icon: IconMapPin,
     permissions: ['viewLocations'],
   },
-  {
-    title: 'المواعيد',
-    path: '/dashboard/schedules',
-    icon: IconCalendar,
-    permissions: ['viewSchedules'],
-  },
+  // {
+  //   title: 'المواعيد',
+  //   path: '/dashboard/schedules',
+  //   icon: IconCalendar,
+  //   permissions: ['viewSchedules'],
+  // },
   {
     title: 'التقييمات',
     path: '/dashboard/reviews',
     icon: IconStar,
     permissions: ['viewReviews'],
   },
-  {
-    title: 'المدفوعات',
-    path: '/dashboard/payments',
-    icon: IconWallet,
-    permissions: ['viewPayments'],
-  },
-  {
-    title: 'الكوبونات',
-    path: '/dashboard/coupons',
-    icon: IconTicket,
-    permissions: ['viewCoupons'],
-  },
-  {
-    title: 'الخصومات',
-    path: '/dashboard/discounts',
-    icon: IconDiscount,
-    permissions: ['viewDiscounts'],
-  },
-  {
-    title: 'البطاقات',
-    path: '/dashboard/gift-cards',
-    icon: IconGiftCard,
-    permissions: ['viewGiftCards'],
-  },
+  // {
+  //   title: 'المدفوعات',
+  //   path: '/dashboard/payments',
+  //   icon: IconWallet,
+  //   permissions: ['viewPayments'],
+  // },
+  // {
+  //   title: 'الكوبونات',
+  //   path: '/dashboard/coupons',
+  //   icon: IconTicket,
+  //   permissions: ['viewCoupons'],
+  // },
+  // {
+  //   title: 'الخصومات',
+  //   path: '/dashboard/discounts',
+  //   icon: IconDiscount,
+  //   permissions: ['viewDiscounts'],
+  // },
+  // {
+  //   title: 'البطاقات',
+  //   path: '/dashboard/gift-cards',
+  //   icon: IconGiftCard,
+  //   permissions: ['viewGiftCards'],
+  // },
   {
     title: 'المكافآت',
     path: '/dashboard/rewards',
@@ -183,7 +183,7 @@ export function Sidebar({ isOpen, onClose }: SidebarProps) {
   const sidebarContent = (
     <Box
       sx={{
-        overflow:'scroll',
+        overflow: 'scroll',
         height: '100%',
         display: 'flex',
         flexDirection: 'column',

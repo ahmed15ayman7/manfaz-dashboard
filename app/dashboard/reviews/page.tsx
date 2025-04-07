@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   Box,
   Typography,
@@ -49,10 +49,10 @@ export default function ReviewsPage() {
   const queryClient = useQueryClient();
 
   // استدعاء بيانات المراجعات
-  const { data: workers } = useQuery<Review[]>({
+  const { data: workers, refetch } = useQuery<Review[]>({
     queryKey: ['workers'],
     queryFn: async () => {
-      const response = await axios.get(API_ENDPOINTS.workers.getAll({}));
+      const response = await axios.get(API_ENDPOINTS.workers.getAll({ limit: rowsPerPage, page, search: searchQuery }));
       const workers = response.data;
       const reviews = workers.reduce((acc: Review[], worker: Worker) => {
         return [...acc, ...worker.reviews];
@@ -60,6 +60,9 @@ export default function ReviewsPage() {
       return reviews;
     },
   });
+  useEffect(() => {
+    refetch();
+  }, [searchQuery, rowsPerPage, page]);
 
   // استدعاء بيانات المستخدمين
   const { data: users } = useQuery<User[]>({

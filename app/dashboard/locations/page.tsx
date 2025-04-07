@@ -1,7 +1,7 @@
 'use client';
 
 import type { ChangeEvent } from 'react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import type { SelectChangeEvent } from '@mui/material';
 import {
   Box,
@@ -82,13 +82,16 @@ export default function LocationsPage() {
   const queryClient = useQueryClient();
 
   // استدعاء البيانات
-  const { data: locations, isLoading } = useQuery<UserLocation[]>({
+  const { data: locations, isLoading, refetch } = useQuery<UserLocation[]>({
     queryKey: ['locations'],
     queryFn: async () => {
-      const response = await axios.get(API_ENDPOINTS.locations.getAll({}));
+      const response = await axios.get(API_ENDPOINTS.locations.getAll({ limit: rowsPerPage, page, search: searchQuery }));
       return response.data.data;
     },
   });
+  useEffect(() => {
+    refetch();
+  }, [searchQuery, rowsPerPage, page]);
 
   const { data: users } = useQuery<User[]>({
     queryKey: ['users'],

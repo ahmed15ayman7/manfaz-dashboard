@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, Suspense } from 'react';
+import { useState, Suspense, useEffect } from 'react';
 import {
   Box,
   Typography,
@@ -83,21 +83,24 @@ function UsersPage() {
     imageUrl: '',
     role: 'user',
   });
- let router = useRouter();
+  let router = useRouter();
   const queryClient = useQueryClient();
 
   // استدعاء بيانات المستخدمين مع البحث والتنقل
-  const { data: users, isLoading } = useQuery({
+  const { data: users, isLoading, refetch } = useQuery({
     queryKey: ['users', searchQuery, page, limit],
     queryFn: async () => {
       const response = await axios.get(API_ENDPOINTS.users.getAll({
-        q: searchQuery,
-        page: page.toString(),
-        limit: limit.toString()
+        limit: limit,
+        page: page,
+        search: searchQuery
       }));
       return response.data.data;
     },
   });
+  useEffect(() => {
+    refetch();
+  }, [searchQuery, rowsPerPage, page]);
 
   // إضافة مستخدم جديد
   const addUserMutation = useMutation({
@@ -182,7 +185,7 @@ function UsersPage() {
     role: user.role === 'user' ? 'مستخدم' :
       user.role === 'store' ? 'متجر' : 'مقدم خدمة',
     ordersCount: user.Order?.length || 0,
-    balance: user.Wallet?.balance || 0,
+    balance: user.Wallet?.[0]?.balance || 0,
     createdAt: user.createdAt ? formatDate(user.createdAt) : '',
   })) || [];
 
@@ -474,7 +477,7 @@ function UsersPage() {
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                           <IconWallet size={16} />
                           <Typography variant="body2">
-                            {formatNumber(user.Wallet?.balance || 0, 'currency')}
+                            {formatNumber(user.Wallet?.[0]?.balance || 0, 'currency')}
                           </Typography>
                         </Box>
                       </Stack>
@@ -647,7 +650,7 @@ function UsersPage() {
                     title: 'إحصائيات النشاط',
                     content: `
                       عدد الطلبات: ${selectedUser.Order?.length || 0}
-                      رصيد المحفظة: ${formatNumber(selectedUser.Wallet?.balance || 0, 'currency')}
+                      رصيد المحفظة: ${formatNumber(selectedUser.Wallet?.[0]?.balance || 0, 'currency')}
                       عدد العناوين المسجلة: ${selectedUser.locations?.length || 0}
                     `
                   }

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Box,
   Paper,
@@ -91,13 +91,16 @@ export default function EmployeesPage() {
   });
 
   // استدعاء قائمة الموظفين
-  const { data: employeesData, isLoading } = useQuery({
+  const { data: employeesData, isLoading, refetch } = useQuery({
     queryKey: ['employees', page, search],
     queryFn: async () => {
       const response = await axiosInstance.get(API_ENDPOINTS.employees.getAll({ page, search }, false));
       return response.data.data;
     },
   });
+  useEffect(() => {
+    refetch();
+  }, [search, page]);
 
   // استدعاء نشاطات الموظف
   const { data: activitiesData, isLoading: isActivitiesLoading } = useQuery({

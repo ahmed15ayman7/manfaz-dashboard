@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   Box,
   Typography,
@@ -153,14 +153,16 @@ export default function OrdersPage() {
     },
   });
 
-  const { data: orders, isLoading } = useQuery<{ orders: Order[] }>({
+  const { data: orders, isLoading, refetch } = useQuery<{ orders: Order[] }>({
     queryKey: ['orders'],
     queryFn: async () => {
-      const response = await axios.get(API_ENDPOINTS.orders.getAll({}));
+      const response = await axios.get(API_ENDPOINTS.orders.getAll({ limit: rowsPerPage, page, search: searchQuery }));
       return response.data.data;
     },
   });
-
+  useEffect(() => {
+    refetch();
+  }, [searchQuery, rowsPerPage, page]);
   // إضافة طلب جديد
   const addOrderMutation = useMutation({
     mutationFn: async (order: typeof orderData) => {
@@ -345,10 +347,10 @@ export default function OrdersPage() {
 
   // حساب الإحصائيات
   const stats = {
-    totalOrders: filteredOrders?.length || 0,
-    pendingOrders: filteredOrders?.filter((o: Order) => o.status === 'pending').length || 0,
-    completedOrders: filteredOrders?.filter((o: Order) => o.status === 'completed').length || 0,
-    totalRevenue: filteredOrders?.reduce((sum: number, order: Order) => sum + (order.price || 0), 0) || 0,
+    totalOrders: orders?.orders?.length || 0,
+    pendingOrders: orders?.orders?.filter((o: Order) => o.status === 'pending').length || 0,
+    completedOrders: orders?.orders?.filter((o: Order) => o.status === 'completed').length || 0,
+    totalRevenue: orders?.orders?.reduce((sum: number, order: Order) => sum + (order.price || 0), 0) || 0,
   };
 
   // تنسيق التاريخ
@@ -489,7 +491,7 @@ export default function OrdersPage() {
               </TableRow>
             </TableHead>
             <TableBody>
-              {(filteredOrders || [])
+              {(orders?.orders || [])
                 .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                 .map((order: Order) => {
                   const user = users?.find(u => u.id === order.userId);
@@ -566,7 +568,7 @@ export default function OrdersPage() {
           </Table>
           <TablePagination
             component="div"
-            count={filteredOrders?.length || 0}
+            count={orders?.orders?.length || 0}
             page={page}
             onPageChange={handleChangePage}
             rowsPerPage={rowsPerPage}

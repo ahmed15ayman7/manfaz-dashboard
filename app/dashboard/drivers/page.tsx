@@ -1,7 +1,7 @@
 'use client';
 
 import type { ChangeEvent } from 'react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import type { SelectChangeEvent } from '@mui/material';
 import {
   Box,
@@ -78,13 +78,16 @@ export default function DriversPage() {
   const queryClient = useQueryClient();
 
   // استدعاء البيانات
-  const { data: drivers, isLoading } = useQuery<DeliveryDriver[]>({
+  const { data: drivers, isLoading, refetch } = useQuery<DeliveryDriver[]>({
     queryKey: ['drivers'],
     queryFn: async () => {
-      const response = await axios.get(API_ENDPOINTS.deliveryDrivers.getAll({}));
+      const response = await axios.get(API_ENDPOINTS.deliveryDrivers.getAll({ limit: rowsPerPage, page, search: searchQuery }));
       return response.data.data.drivers;
     },
   });
+  useEffect(() => {
+    refetch();
+  }, [searchQuery, rowsPerPage, page]);
 
   const { data: users } = useQuery<User[]>({
     queryKey: ['users'],
@@ -184,7 +187,7 @@ export default function DriversPage() {
   const filteredDrivers = drivers?.filter((driver: DeliveryDriver) => {
     const user = users?.find((u: User) => u.id === driver.userId);
     const searchLower = searchQuery.toLowerCase();
-    
+
     return (
       user?.name.toLowerCase().includes(searchLower) ||
       user?.phone.toLowerCase().includes(searchLower) ||
@@ -196,8 +199,8 @@ export default function DriversPage() {
   const stats = {
     totalDrivers: filteredDrivers?.length || 0,
     activeDrivers: filteredDrivers?.filter((d: DeliveryDriver) => d.availability).length || 0,
-    averageRating: filteredDrivers && filteredDrivers.length > 0 
-      ? filteredDrivers.reduce((sum: number, driver: DeliveryDriver) => sum + (driver.rating || 0), 0) / filteredDrivers.length 
+    averageRating: filteredDrivers && filteredDrivers.length > 0
+      ? filteredDrivers.reduce((sum: number, driver: DeliveryDriver) => sum + (driver.rating || 0), 0) / filteredDrivers.length
       : 0,
     totalEarnings: filteredDrivers?.reduce((sum: number, driver: DeliveryDriver) => sum + (driver.earnings || 0), 0) || 0,
   };
@@ -358,7 +361,7 @@ export default function DriversPage() {
                 ?.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                 .map((driver: DeliveryDriver) => {
                   const user = users?.find((u: User) => u.id === driver.userId);
-                  
+
                   return (
                     <TableRow key={driver.id}>
                       <TableCell>

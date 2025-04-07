@@ -1,7 +1,7 @@
 'use client';
 
 import type { ChangeEvent } from 'react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import type { SelectChangeEvent } from '@mui/material';
 import {
   Box,
@@ -99,13 +99,16 @@ export default function ServicesPage() {
   const queryClient = useQueryClient();
 
   // استدعاء البيانات
-  const { data: services, isLoading } = useQuery<Service[]>({
+  const { data: services, isLoading, refetch } = useQuery<Service[]>({
     queryKey: ['services'],
     queryFn: async () => {
-      const response = await axios.get(API_ENDPOINTS.services.getAll({}));
+      const response = await axios.get(API_ENDPOINTS.services.getAll({ limit: rowsPerPage, page, search: searchQuery }));
       return response.data.data;
     },
   });
+  useEffect(() => {
+    refetch();
+  }, [searchQuery, rowsPerPage, page]);
 
   const { data: categories } = useQuery<Category[]>({
     queryKey: ['categories'],
@@ -230,7 +233,7 @@ export default function ServicesPage() {
   const filteredServices = services?.filter((service: Service) => {
     const category = categories?.find((c: Category) => c.id === service.categoryId);
     const searchLower = searchQuery.toLowerCase();
-    
+
     return (
       service.name.toLowerCase().includes(searchLower) ||
       service.description?.toLowerCase().includes(searchLower) ||
@@ -242,8 +245,8 @@ export default function ServicesPage() {
   const stats = {
     totalServices: filteredServices?.length || 0,
     activeServices: filteredServices?.filter((s: Service) => s.availability).length || 0,
-    averageRating: filteredServices ? 
-      filteredServices.reduce((sum: number, service: Service) => sum + (service.rating || 0), 0) / 
+    averageRating: filteredServices ?
+      filteredServices.reduce((sum: number, service: Service) => sum + (service.rating || 0), 0) /
       (filteredServices.length || 1) : 0,
     totalParameters: filteredServices?.reduce((sum: number, service: Service) => sum + (service.parameters?.length || 0), 0) || 0,
   };
@@ -399,7 +402,7 @@ export default function ServicesPage() {
                 ?.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                 .map((service: Service) => {
                   const category = categories?.find((c: Category) => c.id === service.categoryId);
-                  
+
                   return (
                     <TableRow key={service.id}>
                       <TableCell>

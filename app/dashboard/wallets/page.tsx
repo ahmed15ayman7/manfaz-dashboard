@@ -1,7 +1,7 @@
 'use client';
 
 import type { ChangeEvent } from 'react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import type {
   SelectChangeEvent,
 } from '@mui/material';
@@ -62,14 +62,16 @@ export default function WalletsPage() {
   const queryClient = useQueryClient();
 
   // استدعاء بيانات المستخدمين
-  const { data: users, isLoading } = useQuery<User[]>({
-    queryKey: ['users'],
+  const { data: wallets, isLoading, refetch } = useQuery<Wallet[]>({
+    queryKey: ['wallets'],
     queryFn: async () => {
-      const response = await axios.get(API_ENDPOINTS.users.getAll({}));
+      const response = await axios.get(API_ENDPOINTS.wallets.getAll({ limit: rowsPerPage, page, search: searchQuery }));
       return response.data.data;
     },
   });
-
+  useEffect(() => {
+    refetch();
+  }, [searchQuery, rowsPerPage, page]);
   // إضافة معاملة جديدة
   const addTransactionMutation = useMutation({
     mutationFn: async (transaction: typeof transactionData) => {
@@ -77,7 +79,7 @@ export default function WalletsPage() {
       return response.data.data;
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['users'] });
+      queryClient.invalidateQueries({ queryKey: ['wallets'] });
       handleCloseDialog();
     },
   });
@@ -157,22 +159,22 @@ export default function WalletsPage() {
   };
 
   // جمع جميع المعاملات من المحافظ
-  const allTransactions = users?.reduce<Transaction[]>((acc: Transaction[], user: User) => {
-    if (user.Wallet?.[0]?.transactions) {
-      return [...acc, ...user.Wallet?.[0]?.transactions];
+  const allTransactions = wallets?.reduce<Transaction[]>((acc: Transaction[], wallet: Wallet) => {
+    if (wallet.transactions) {
+      return [...acc, ...wallet.transactions];
     }
     return acc;
   }, []);
 
   // تصفية المعاملات حسب البحث
   const filteredTransactions = allTransactions?.filter((transaction: Transaction) => {
-    const user = users?.find((u: User) => u.Wallet?.[0]?.id === transaction.walletId);
-    return user?.name.toLowerCase().includes(searchQuery.toLowerCase());
+    const wallet = wallets?.find((w: Wallet) => w.id === transaction.walletId);
+    return wallet?.user?.name.toLowerCase().includes(searchQuery.toLowerCase());
   });
 
   // حساب الإحصائيات
   const stats = {
-    totalBalance: users?.reduce((sum: number, user: User) => sum + (user.Wallet?.[0]?.balance || 0), 0) || 0,
+    totalBalance: wallets?.reduce((sum: number, wallet: Wallet) => sum + (wallet.balance || 0), 0) || 0,
     totalTransactions: filteredTransactions?.length || 0,
     totalDeposits: filteredTransactions?.filter((t: Transaction) => t.type === 'deposit').reduce((sum: number, t: Transaction) => sum + t.amount, 0) || 0,
     totalWithdrawals: filteredTransactions?.filter((t: Transaction) => t.type === 'withdrawal').reduce((sum: number, t: Transaction) => sum + t.amount, 0) || 0,
@@ -305,18 +307,18 @@ export default function WalletsPage() {
               {filteredTransactions
                 ?.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
                 .map((transaction) => {
-                  const user = users?.find(u => u.Wallet?.[0]?.id === transaction.walletId);
+                  const wallet = wallets?.find(w => w.id === transaction.walletId);
                   return (
                     <TableRow key={transaction.id}>
                       <TableCell>
                         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-                          <Avatar src={user?.imageUrl}>
-                            {user?.name?.[0]}
+                          <Avatar src={wallet?.user?.imageUrl}>
+                            {wallet?.user?.name?.[0]}
                           </Avatar>
                           <Box>
-                            <Typography variant="subtitle2">{user?.name}</Typography>
+                            <Typography variant="subtitle2">{wallet?.user?.name}</Typography>
                             <Typography variant="caption" color="text.secondary">
-                              {user?.email}
+                              {wallet?.user?.email}
                             </Typography>
                           </Box>
                         </Box>
@@ -342,15 +344,15 @@ export default function WalletsPage() {
                             transaction.status === 'completed'
                               ? 'مكتملة'
                               : transaction.status === 'pending'
-                              ? 'قيد المعالجة'
-                              : 'فشلت'
+                                ? 'قيد المعالجة'
+                                : 'فشلت'
                           }
                           color={
                             transaction.status === 'completed'
                               ? 'success'
                               : transaction.status === 'pending'
-                              ? 'warning'
-                              : 'error'
+                                ? 'warning'
+                                : 'error'
                           }
                           size="small"
                         />
@@ -358,19 +360,19 @@ export default function WalletsPage() {
                       <TableCell>{formatDate(transaction.createdAt)}</TableCell>
                       <TableCell>
                         <Stack direction="row" spacing={1}>
-                          <IconButton 
-                            color="primary" 
+                          <IconButton
+                            color="primary"
                             size="small"
                             onClick={() => handleOpenDialog(transaction)}
                           >
                             <IconEdit size={18} />
                           </IconButton>
-                          <IconButton 
-                            color="error" 
+                          <IconButton
+                            color="error"
                             size="small"
-                            onClick={() => deleteTransactionMutation.mutate({ 
-                              walletId: transaction.walletId, 
-                              transactionId: transaction.id 
+                            onClick={() => deleteTransactionMutation.mutate({
+                              walletId: transaction.walletId,
+                              transactionId: transaction.id
                             })}
                           >
                             <IconTrash size={18} />
@@ -410,10 +412,10 @@ export default function WalletsPage() {
                   label="المستخدم"
                   onChange={(e: SelectChangeEvent) => setTransactionData({ ...transactionData, walletId: e.target.value })}
                 >
-                  {users?.map((user) => (
-                    user.Wallet && (
-                      <MenuItem key={user.Wallet?.[0]?.id} value={user.Wallet?.[0]?.id}>
-                        {user.name}
+                  {wallets?.map((wallet) => (
+                    wallet.user && (
+                      <MenuItem key={wallet.user?.id} value={wallet.user?.id}>
+                        {wallet.user?.name}
                       </MenuItem>
                     )
                   ))}

@@ -1,7 +1,7 @@
 'use client';
 
 import type { ChangeEvent } from 'react';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import type { SelectChangeEvent } from '@mui/material';
 import {
   Box,
@@ -77,11 +77,14 @@ export default function RewardsPage() {
   const { data: rewards, isLoading, refetch } = useQuery<Reward[]>({
     queryKey: ['rewards'],
     queryFn: async () => {
-      const response = await axiosInstance.get(API_ENDPOINTS.stores.rewards.getAll(storeId, {}, false));
+      const response = await axiosInstance.get(API_ENDPOINTS.stores.rewards.getAll(storeId, { limit: rowsPerPage, page, search: searchQuery }, false));
       return response.data.data;
     },
     enabled: !!storeId,
   });
+  useEffect(() => {
+    refetch();
+  }, [searchQuery, rowsPerPage, page]);
 
   const { data: users } = useQuery<User[]>({
     queryKey: ['users'],
@@ -232,32 +235,32 @@ export default function RewardsPage() {
           <Typography variant="h5" fontWeight="bold">
             المكافآت والنقاط
           </Typography>
-          <Box sx={{ mb: 4, display: 'flex', alignItems: 'center',gap:"10px" }}>
-          <Select
-            value={storeId}
-            defaultValue="" 
-            onChange={(e: SelectChangeEvent) => {
-              setStoreId(e.target.value);
-              refetch();
-            }}
-          >
-            <MenuItem disabled selected  value="">
+          <Box sx={{ mb: 4, display: 'flex', alignItems: 'center', gap: "10px" }}>
+            <Select
+              value={storeId}
+              defaultValue=""
+              onChange={(e: SelectChangeEvent) => {
+                setStoreId(e.target.value);
+                refetch();
+              }}
+            >
+              <MenuItem disabled selected value="">
                 اختر المتجر
               </MenuItem>
-            {stores?.map((store: Store) => (
-              <MenuItem key={store.id} value={store.id}>
-                {store.name}
-              </MenuItem>
-            ))}
-          </Select>
-          <Button
-            variant="contained"
-            startIcon={<IconPlus size={20} />}
-            onClick={() => handleOpenDialog()}
-          >
-            إضافة مكافأة جديدة
-          </Button>
-        </Box>
+              {stores?.map((store: Store) => (
+                <MenuItem key={store.id} value={store.id}>
+                  {store.name}
+                </MenuItem>
+              ))}
+            </Select>
+            <Button
+              variant="contained"
+              startIcon={<IconPlus size={20} />}
+              onClick={() => handleOpenDialog()}
+            >
+              إضافة مكافأة جديدة
+            </Button>
+          </Box>
         </Box>
 
 

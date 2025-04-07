@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   Box,
   Typography,
@@ -60,13 +60,16 @@ export default function CategoriesPage() {
 
   const queryClient = useQueryClient();
 
-  const { data: categories, isLoading } = useQuery<Category[]>({
+  const { data: categories, isLoading, refetch } = useQuery<Category[]>({
     queryKey: ['categories'],
     queryFn: async () => {
-      const response = await axios.get(API_ENDPOINTS.categories.getAll({}));
+      const response = await axios.get(API_ENDPOINTS.categories.getAll({ limit: rowsPerPage, page, search: searchQuery }));
       return response.data.data.categories;
     },
   });
+  useEffect(() => {
+    refetch();
+  }, [searchQuery, rowsPerPage, page]);
 
   const addCategoryMutation = useMutation({
     mutationFn: async (category: typeof categoryData) => {
@@ -115,7 +118,7 @@ export default function CategoriesPage() {
     subName: category.subName || '',
     type: category.type === 'service' ? 'خدمة' : 'توصيل',
     status: category.status === 'active' ? 'نشط' :
-            category.status === 'inactive' ? 'غير نشط' : 'مؤرشف',
+      category.status === 'inactive' ? 'غير نشط' : 'مؤرشف',
     sortOrder: category.sortOrder,
     servicesCount: category.services?.length || 0,
     storesCount: category.stores?.length || 0,
@@ -210,7 +213,7 @@ export default function CategoriesPage() {
           الاسم الفرعي: ${selectedCategory.subName || 'لا يوجد'}
           النوع: ${selectedCategory.type === 'service' ? 'خدمة' : 'توصيل'}
           الحالة: ${selectedCategory.status === 'active' ? 'نشط' :
-selectedCategory.status === 'inactive' ? 'غير نشط' : 'مؤرشف'}
+            selectedCategory.status === 'inactive' ? 'غير نشط' : 'مؤرشف'}
           الترتيب: ${selectedCategory.sortOrder}
         `
       },
@@ -274,12 +277,12 @@ selectedCategory.status === 'inactive' ? 'غير نشط' : 'مؤرشف'}
           <Typography variant="h5" fontWeight="bold">
             التصنيفات
           </Typography>
-          
+
           <ActionButton
             requiredPermissions={['createCategories']}
             variant="contained"
             startIcon={<IconPlus size={20} />}
-            onClick={()=>handleOpenDialog()}
+            onClick={() => handleOpenDialog()}
           >
             إضافة تصنيف
           </ActionButton>
@@ -418,15 +421,15 @@ selectedCategory.status === 'inactive' ? 'غير نشط' : 'مؤرشف'}
                           category.status === 'active'
                             ? 'نشط'
                             : category.status === 'inactive'
-                            ? 'غير نشط'
-                            : 'مؤرشف'
+                              ? 'غير نشط'
+                              : 'مؤرشف'
                         }
                         color={
                           category.status === 'active'
                             ? 'success'
                             : category.status === 'inactive'
-                            ? 'warning'
-                            : 'error'
+                              ? 'warning'
+                              : 'error'
                         }
                         size="small"
                       />
@@ -447,8 +450,8 @@ selectedCategory.status === 'inactive' ? 'غير نشط' : 'مؤرشف'}
                       >
                         <IconTrash size={18} />
                       </ActionButton>
-                      <IconButton 
-                        color="info" 
+                      <IconButton
+                        color="info"
                         size="small"
                         onClick={() => handlePrintReport(category)}
                       >
